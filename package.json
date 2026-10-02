@@ -1,0 +1,33 @@
+{
+  "name": "eddias-financeiro",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "vite --config apps/web/vite.config.ts --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build --config apps/web/vite.config.ts",
+    "lint": "oxlint apps packages scripts tests",
+    "test": "vitest run && node --test supabase/migracoes/trava.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "db:test": "bash supabase/tests/run.sh",
+    "db:aplicar": "bash supabase/aplicar-migracoes.sh",
+    "check": "pnpm lint && pnpm test && pnpm build && pnpm db:test && pnpm test:worker-runtime",
+    "worker:dry-run": "wrangler deploy --config apps/worker/wrangler.jsonc --env \"\" --dry-run --outdir .data/workerd",
+    "test:worker-runtime": "pnpm worker:dry-run && node tests/worker-runtime.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "24.13.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "oxlint": "1.83.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.2",
+    "vite": "8.3.2",
+    "vitest": "5.0.3",
+    "wrangler": "4.146.0"
+  }
+}

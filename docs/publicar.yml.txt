@@ -1,0 +1,82 @@
+# Configuração preparada para .github/workflows/publicar.yml; instalação manual somente se necessária.
+name: Publicar Financeiro
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: financeiro-publicacao
+  cancel-in-progress: false
+jobs:
+  publicar:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: financeiro-producao
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ensaio-local
+          POSTGRES_DB: ensaio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U postgres'
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DEPLOY_ENVIRONMENT: production
+      BANCO_URL: ${{ secrets.BANCO_URL }}
+      BACKUP_SENHA: ${{ secrets.BACKUP_SENHA }}
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PGSSLMODE: verify-full
+      PGCONNECT_TIMEOUT: 15
+      ENSAIO_URL: postgresql://postgres:ensaio-local@127.0.0.1:5432/ensaio?sslmode=disable
+      COMMIT: ${{ github.sha }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Testes e compilação
+        run: pnpm check && pnpm worker:dry-run
+      - name: Testar navegador com dados sintéticos
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          export CHROMIUM_PATH="$(node -e "process.stdout.write(require('@playwright/test').chromium.executablePath())")"
+          pnpm test:browser
+      - name: Verificar destino antes de qualquer alteração
+        run: node scripts/validate-deploy.mjs
+      - name: Instalar cliente PostgreSQL 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl --fail --silent --show-error https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /tmp/postgresql.asc
+          sudo install -m 644 /tmp/postgresql.asc /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main' | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-17 gnupg
+          echo '/usr/lib/postgresql/17/bin' >> "$GITHUB_PATH"
+      - name: Simular migrações e gerar backup cifrado
+        run: bash supabase/aplicar-migracoes.sh --simular && bash supabase/migracoes/backup.sh .data/deploy-backup antes-da-migracao
+      - name: Guardar backup antes de aplicar
+        uses: actions/upload-artifact@v4
+        with:
+          name: financeiro-backup-${{ github.run_id }}
+          path: .data/deploy-backup/*.dump.gpg
+          retention-days: 30
+          include-hidden-files: true
+          if-no-files-found: error
+      - name: Ensaiar sobre estrutura real e aplicar pendentes
+        run: bash supabase/migracoes/ensaio.sh && bash supabase/aplicar-migracoes.sh
+      - name: Publicar Worker e Pages
+        run: bash scripts/deploy.sh

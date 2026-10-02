@@ -1,0 +1,51 @@
+import { chromium, expect } from '@playwright/test';
+import { spawn } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
+const server = spawn('node', ['node_modules/vite/bin/vite.js', '--config', 'apps/web/vite.config.ts', '--host', '127.0.0.1', '--port', '5177'], { stdio: 'pipe' });
+const url = 'http://127.0.0.1:5177';
+let browser;
+try {
+  for (let i = 0; i < 40; i++) { try { if ((await fetch(url)).ok) break; } catch {} await new Promise(r => setTimeout(r, 100)); }
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
+  const context = await browser.newContext(); const page = await context.newPage(); const failures = [];
+  page.on('pageerror', e => failures.push(e.message));
+  const tenant = 'edd1a500-0000-4000-8000-000000000001'; const user = { id: '11111111-1111-4111-8111-111111111111', email: 'admin@example.test', aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, created_at: '2026-10-01' };
+  const companies = []; const accounts = []; let role = 'admin'; let saveAccountCalls = 0;
+  await page.route('**/api/config', route => route.fulfill({ json: { environment: 'preview', supabaseUrl: 'https://testfixture.supabase.co', supabasePublishableKey: 'sb_publishable_test' } }));
+  await page.route('https://testfixture.supabase.co/**', async route => {
+    const req = route.request(); const path = new URL(req.url()).pathname; const b = req.postDataJSON();
+    let data;
+    if (path === '/auth/v1/token') data = { access_token: 'test-session', refresh_token: 'refresh-test', expires_in: 3600, token_type: 'bearer', user };
+    else if (path === '/auth/v1/user') data = user;
+    else if (path.endsWith('/fin_my_workspaces')) data = [{ tenant_id: tenant, user_id: user.id, role, active: true, permissions: { contas: 'view', empresas: 'view' }, workspace_name: 'Grupo Eddias' }];
+    else if (path.endsWith('/fin_members')) data = [];
+    else if (path.endsWith('/fin_companies')) data = companies;
+    else if (path.endsWith('/fin_bank_accounts')) data = accounts;
+    else if (path.endsWith('/fin_save_company')) { companies.push({ id: b.p_id, name: b.p_name, document: b.p_document, tenant_id: tenant, version: 1, deleted_at: null }); data = companies.at(-1); }
+    else if (path.endsWith('/fin_save_account')) { saveAccountCalls++; accounts.push({ id: b.p_id, ...b.p_data, tenant_id: tenant, version: 1, deleted_at: null }); data = accounts.at(-1); }
+    else throw new Error('Requisição inesperada: ' + path);
+    await route.fulfill({ json: data });
+  });
+  await page.goto(url); await page.getByLabel('E-mail', { exact: true }).fill(user.email); await page.getByLabel('Senha', { exact: true }).fill('synthetic-password'); await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
+  await page.getByRole('button', { name: 'Empresas', exact: true }).click(); await page.getByRole('button', { name: 'Cadastrar empresa', exact: true }).click();
+  await page.getByLabel('Nome da empresa').fill('Eddias teste'); await page.getByRole('button', { name: 'Salvar empresa' }).click(); await expect(page.getByRole('heading', { name: 'Eddias teste' })).toBeVisible();
+  await page.getByRole('button', { name: 'Contas bancárias', exact: true }).click(); await page.getByRole('button', { name: 'Cadastrar conta', exact: true }).click();
+  await page.getByLabel('Empresa', { exact: true }).selectOption(companies[0].id); await page.getByLabel('Nome da conta').fill('Kamino teste');
+  await page.getByLabel('Banco ou instituição').fill('Kamino'); await page.getByLabel('Número da conta').fill('0001'); await page.getByLabel('Saldo de referência (R$)').fill('123,45');
+  await page.getByRole('button', { name: 'Salvar conta', exact: true }).click(); await expect(page.getByRole('alert')).toBeVisible(); expect(saveAccountCalls).toBe(0);
+  await page.getByLabel('Data do saldo de referência').fill('2026-10-01');
+  page.on('dialog', dialog => dialog.accept()); await page.reload();
+  await page.getByRole('button', { name: 'Contas bancárias', exact: true }).click(); await page.getByRole('button', { name: 'Cadastrar conta', exact: true }).click();
+  await expect(page.getByLabel('Nome da conta')).toHaveValue('Kamino teste'); await expect(page.locator('form[data-dirty="true"]')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Salvar conta', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Kamino teste' })).toBeVisible(); expect(accounts[0].reference_balance_cents).toBe(12345);
+  await page.getByRole('button', { name: 'Usar tema escuro' }).click(); await expect(page.locator('.app.dark')).toHaveCount(1);
+  await mkdir('.data/validation', { recursive: true }); await page.screenshot({ path: '.data/validation/f1-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 }); await expect(page.getByRole('heading', { name: 'Kamino teste' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '.data/validation/f1-mobile.png', fullPage: true });
+  role = 'membro'; await page.reload(); await page.getByRole('button', { name: 'Abrir menu' }).click();
+  await expect(page.getByRole('button', { name: 'Configurações', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Contas bancárias', exact: true }).click(); await expect(page.getByRole('button', { name: 'Cadastrar conta', exact: true })).toHaveCount(0);
+  expect(failures).toEqual([]); console.log('Navegador: login, empresas, contas, validação, rascunho, tema, mobile e perfil de leitura aprovados (API simulada).');
+} finally { await browser?.close(); server.kill(); }

@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "eddias-financeiro",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2026-10-01",
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "services": [
+    {
+      "binding": "FINANCEIRO_API",
+      "service": "eddias-financeiro-v2"
+    }
+  ],
+  "env": {
+    "preview": {
+      "vars": {
+        "ENVIRONMENT": "disabled"
+      },
+      "services": []
+    }
+  }
+}
