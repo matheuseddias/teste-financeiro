@@ -34,13 +34,16 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       PGSSLMODE: verify-full
-      PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
       PGCONNECT_TIMEOUT: 15
       ENSAIO_URL: postgresql://postgres:ensaio-local@127.0.0.1:5432/ensaio?sslmode=disable
       COMMIT: ${{ github.sha }}
       WRANGLER_SEND_METRICS: 'false'
     steps:
       - uses: actions/checkout@v4
+      - name: Configurar certificados públicos do Supabase
+        run: |
+          cat /etc/ssl/certs/ca-certificates.crt supabase/certs/prod-ca-2021.crt supabase/certs/prod-ca-2025.crt > "$RUNNER_TEMP/financeiro-ca.crt"
+          echo "PGSSLROOTCERT=$RUNNER_TEMP/financeiro-ca.crt" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4
         with:
           version: 11.19.0
