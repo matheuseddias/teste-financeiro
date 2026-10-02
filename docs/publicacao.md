@@ -11,7 +11,7 @@ A produção recebe somente `main`. O usuário optou por ambiente único; não c
 1. No GitHub do repositório, use somente o environment `financeiro-producao`. Nele, cadastre os nomes abaixo. Não cole segredos no chat ou em arquivos versionados.
 2. Para produção, use o projeto Supabase atual. `BANCO_URL` vem de **Connect → Session pooler**: URI PostgreSQL, porta 5432, com senha do banco codificada na URL. A chave publishable não concede permissão de criar tabelas. O cliente usa TLS com verificação do certificado.
 3. A chave `SUPABASE_SERVICE_ROLE_KEY` vem de **Project Settings → API keys → Legacy API Keys → service_role**. Ela permite ao Worker gerar snapshots; nunca deve ir ao frontend. Não é o personal access token da conta Supabase.
-4. A configuração de publicação está preparada em `docs/publicar.yml.txt`, para instalação em `.github/workflows/publicar.yml`. O texto de referência dizia que seu token não possuía escopo workflow; essa restrição não foi comprovada na conexão atual. Só será necessário copiar manualmente se o acesso disponível impedir a instalação automática.
+4. O workflow já está instalado em `.github/workflows/publicar.yml`. O envio automático funcionou; não é necessário copiar o arquivo manualmente. `docs/publicar.yml.txt` permanece como referência.
 
 | Tipo no GitHub Environment | Nome | Uso |
 | --- | --- | --- |
@@ -57,7 +57,7 @@ Antes do corte, registre o deployment atual em Cloudflare Pages. Se houver falha
 Depois dos testes e da configuração:
 
 ```bash
-pnpm check && pnpm test:browser && pnpm worker:dry-run && git add . && git commit -m "Cria fundação do novo financeiro com empresas e contas bancárias" && git push -u origin f1-fundacao
+pnpm check && pnpm test:browser && pnpm worker:dry-run && git add . && git commit -m "Cria fundação do novo financeiro com empresas e contas bancárias" && git push
 ```
 
-Aguarde a conclusão do workflow e mais 1–2 minutos para propagação do Pages; atualize o navegador. A branch `f1-fundacao` não publica. O merge em `main` faz o corte de produção. Sem instalar o workflow, o push sozinho não publica.
+Aguarde a conclusão do workflow e mais 1–2 minutos para propagação do Pages; atualize o navegador. O push em `main` executa o workflow e publica após as verificações. Branches de trabalho não publicam.

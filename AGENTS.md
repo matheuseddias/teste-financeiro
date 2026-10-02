@@ -9,6 +9,6 @@
 - Código modular, até 400 linhas por arquivo de código. Dinheiro em centavos inteiros.
 - Não registrar segredos, extratos ou dados pessoais no Git, logs ou screenshots públicas.
 - RLS e permissões no banco são obrigatórias; interface não é controle de segurança.
-- O template de Actions fica em docs/publicar.yml.txt. O usuário questionou a necessidade de instalação manual: não presumir falta de permissão workflow a partir do texto de referência; distinguir leitura Git de permissão de publicar workflows.
+- Workflow ativo em .github/workflows/publicar.yml, referência em docs/publicar.yml.txt. A permissão de enviar workflows foi confirmada; não solicitar cópia manual. Mudanças em main publicam após testes, backup e ensaio.
 - Verificação: pnpm check && pnpm test:browser && pnpm worker:dry-run. No ambiente gerenciado use scripts/cloud-check.sh para os diretórios graváveis.
 - Reportar ENTREGUE / PENDENTE / BLOQUEADA, ações necessárias e comando de commit/push ao terminar uma fase. Nunca afirmar publicação ou validação remota baseada só em testes locais.

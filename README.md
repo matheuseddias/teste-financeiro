@@ -11,7 +11,7 @@ A **F1** implementa a fundação: acesso, empresas, contas bancárias, permissõ
 - `packages/core`: regras independentes e tipos.
 - `supabase/migrations`: SQL versionado; prefixo `fin_`.
 - `supabase/migracoes`: aplicador, backup cifrado e ensaio, adaptados do Prodio.
-- `docs/publicar.yml.txt`: configuração preparada do GitHub Actions. Instalação manual somente se o acesso disponível exigir.
+- `.github/workflows/publicar.yml`: publicação automática em produção; cópia de referência em `docs/publicar.yml.txt`.
 
 ## Desenvolvimento
 
