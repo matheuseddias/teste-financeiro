@@ -46,10 +46,10 @@ describe('snapshots completos', () => {
     vi.spyOn(db, 'rows').mockResolvedValue([{ id: tenantId }]);
     await expect(backup(db, tenantId, 'run')).rejects.toThrow('alterados'); expect(req).toHaveBeenCalledTimes(2);
   });
-  it('grava só depois das sete tabelas e confirmação de revisão', async () => {
+  it('grava só depois das dez tabelas e confirmação de revisão', async () => {
     const db = new Database(env); const req = vi.spyOn(db, 'request').mockResolvedValueOnce('1:1').mockResolvedValueOnce('1:1').mockResolvedValueOnce('snapshot');
     const rows = vi.spyOn(db, 'rows').mockResolvedValue([{ id: tenantId }]);
-    expect(await backup(db, tenantId, 'run')).toEqual({ id: 'snapshot' }); expect(rows).toHaveBeenCalledTimes(7);
+    expect(await backup(db, tenantId, 'run')).toEqual({ id: 'snapshot' }); expect(rows).toHaveBeenCalledTimes(10);
     expect(req.mock.calls[2][1]).toMatchObject({ p_run_key: 'run', p_revision: '1:1', p_data: { fin_plans: [{ id: tenantId }], fin_commitments: [{ id: tenantId }] } });
   });
 });

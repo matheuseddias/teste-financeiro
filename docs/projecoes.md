@@ -1,6 +1,6 @@
 # Projeções para a reunião
 
-O usuário priorizou projeções em 01/10/2026. A entrega antecipa o núcleo de planejamento da F5 com lançamentos da F2, sem depender das integrações da F4. F3, F4 e F6 continuam pendentes até suas respectivas validações.
+O usuário priorizou projeções em 01/10/2026. A entrega antecipa o núcleo de planejamento da F5 com lançamentos da F2, sem depender das integrações da F4. A versão 0.4 acrescenta importação e conciliação da F3. Integrações F4 e aprendizagem F6 continuam pendentes.
 
 ## Como usar
 
@@ -18,10 +18,16 @@ O usuário priorizou projeções em 01/10/2026. A entrega antecipa o núcleo de 
 - Fornecedores e impostos: o maior valor entre o detalhamento conhecido e a estimativa percentual do GMV, calculado por categoria/mês. Trata-se de cobertura agregada; a vinculação entre compras, notas e contas a pagar depende da integração/conciliador.
 - Custos fixos e outras saídas são somados às obrigações do mês. Taxas já descontadas no percentual líquido não devem ser descontadas novamente.
 - Saldo final = saldo inicial + entradas − saídas acumuladas. O menor saldo exibido considera o inicial e os fechamentos mensais, não o menor saldo intramês.
-- Todos os percentuais são premissas manuais explícitas, não métricas históricas aprendidas. Não há importação automática de vendas ou extratos nesta entrega.
+- Todos os percentuais são premissas manuais explícitas, não métricas históricas aprendidas. Não há sincronização automática de vendas. Extratos são importados por arquivo na tela Extratos e conciliação.
 - Conservador: GMV −20%, percentual líquido −3 pontos percentuais, repasse +7 dias. Crescimento: GMV +10%. Variações são hipóteses editáveis, não recomendações.
 - Cenários, lançamentos e alterações são persistidos no Supabase com RLS, permissão própria de planejamento, controle de versão e auditoria. Administrador administra as permissões. Rascunhos permanecem neste dispositivo até salvar.
 - Backup diário e pré-deploy incluem as novas tabelas; retenção dos snapshots permanece em 20.
+
+## Projetado × realizado
+
+A tabela compara as premissas do cenário com os movimentos importados. A opção **Atualizar a projeção com os extratos classificados e conciliados** retira parcelas vinculadas das datas previstas e incorpora o realizado na data bancária. Pagamentos parciais preservam o restante. Repasses e despesas operacionais classificados, sem vínculo, abatem estimativas agregadas do mesmo mês; isso não é identificação da safra de vendas liquidada. Movimentos não classificados entram no realizado e podem se sobrepor às previsões até a conciliação.
+
+Transferências próprias classificadas ficam fora das entradas e saídas consolidadas. Aportes e empréstimos entram no caixa, sem abater a projeção de repasses. Confira cobertura de todas as contas e contrapartidas; importação ausente não comprova movimento zero. Detalhes em [extratos.md](extratos.md).
 
 ## Validação
 

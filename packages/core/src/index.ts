@@ -1,6 +1,6 @@
 export type Role = 'admin' | 'membro';
 export type Access = 'none' | 'view' | 'edit';
-export type Area = 'empresas' | 'contas' | 'auditoria' | 'planejamento';
+export type Area = 'empresas' | 'contas' | 'auditoria' | 'planejamento' | 'extratos';
 export interface Membership {
   tenant_id: string; user_id: string; role: Role; active: boolean;
   permissions: Partial<Record<Area, Access>>; workspace_name?: string;
@@ -23,6 +23,7 @@ export interface AuditEvent {
 export interface Snapshot {
   companies: Company[]; accounts: BankAccount[]; memberships: Membership[];
   plans: import('./planning').Plan[]; commitments: import('./planning').Commitment[];
+  transactions: import('./statements').BankTransaction[]; allocations: import('./statements').Allocation[]; profiles: import('./statements').ImportProfile[];
 }
 export const MAX_CENTS = 9_000_000_000_000;
 export function access(member: Membership | null, area: Area): Access {
@@ -67,3 +68,5 @@ export function validateAccount(value: Partial<BankAccount>): string | null {
   return null;
 }
 export * from './planning';
+
+export * from './statements';

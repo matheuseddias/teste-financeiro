@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Building2, Landmark, LayoutDashboard, TrendingUp, CalendarDays, LogOut, Menu, Moon, ShieldCheck, Sun, Users, X } from 'lucide-react';
+import { ArrowRight, Building2, Landmark, LayoutDashboard, TrendingUp, CalendarDays, Upload, LogOut, Menu, Moon, ShieldCheck, Sun, Users, X } from 'lucide-react';
 import { access } from '@eddias/core';
 import { useAuth } from './auth';
 import { useStore } from '../domain/store';
@@ -8,8 +8,9 @@ import { Accounts } from '../pages/Accounts';
 import { Companies } from '../pages/Companies';
 import { Audit, Settings } from '../pages/Settings';
 import { Planning } from '../pages/planning/Planning';
+import { Statements } from '../pages/statements/Statements';
 import { Commitments } from '../pages/Commitments';
-type Page = 'projecoes' | 'lancamentos' | 'inicio' | 'empresas' | 'contas' | 'auditoria' | 'config';
+type Page = 'extratos' | 'projecoes' | 'lancamentos' | 'inicio' | 'empresas' | 'contas' | 'auditoria' | 'config';
 export function App() {
   const { member, session, signOut, config } = useAuth(); const { data, error, refresh } = useStore();
   const [page, setPage] = useState<Page>('inicio'); const [menu, setMenu] = useState(false);
@@ -17,6 +18,7 @@ export function App() {
   const tabs = [
     { id: 'inicio' as const, label: 'Visão geral', icon: LayoutDashboard, visible: true },
     { id: 'projecoes' as const, label: 'Projeções de caixa', icon: TrendingUp, visible: access(member, 'planejamento') !== 'none' },
+    { id: 'extratos' as const, label: 'Extratos e conciliação', icon: Upload, visible: access(member, 'extratos') !== 'none' },
     { id: 'lancamentos' as const, label: 'Lançamentos previstos', icon: CalendarDays, visible: access(member, 'planejamento') !== 'none' },
     { id: 'empresas' as const, label: 'Empresas', icon: Building2, visible: access(member, 'empresas') !== 'none' },
     { id: 'contas' as const, label: 'Contas bancárias', icon: Landmark, visible: access(member, 'contas') !== 'none' },
@@ -24,7 +26,7 @@ export function App() {
     { id: 'config' as const, label: 'Configurações', icon: Users, visible: member.role === 'admin' },
   ].filter(t => t.visible);
   const current = tabs.some(t => t.id === page) ? page : 'inicio';
-  function leave() { return !document.querySelector('form[data-dirty="true"]') || window.confirm('Há alterações não salvas. O rascunho ficará neste dispositivo. Continuar?'); }
+  function leave() { return !document.querySelector('form[data-dirty="true"]') || window.confirm('Há alterações não salvas. Continuar para outra tela?'); }
   function navigate(next: Page) { if (!leave()) return; setPage(next); setMenu(false); }
   return <div className={'app' + (dark ? ' dark' : '')}>
     {menu && <button className="scrim" aria-label="Fechar menu" onClick={() => setMenu(false)} />}
@@ -47,7 +49,7 @@ export function App() {
             <ol><li><span>01</span><div><strong>Identifique as empresas</strong><p>Separe Eddias e Eddias Home conforme a operação.</p></div></li><li><span>02</span><div><strong>Cadastre as contas</strong><p>Inclua bancos e contas digitais, como a Kamino.</p></div></li><li><span>03</span><div><strong>Informe uma referência</strong><p>Registre saldo e data, sem misturar períodos.</p></div></li></ol></section>
           <Notice>Os saldos cadastrados são referências informadas. Não representam valores bancários conciliados.</Notice>
         </>}
-        {current === 'projecoes' && <Planning />}{current === 'lancamentos' && <Commitments />}
+        {current === 'extratos' && <Statements />}{current === 'projecoes' && <Planning />}{current === 'lancamentos' && <Commitments />}
         {current === 'empresas' && <Companies />}{current === 'contas' && <Accounts />}{current === 'auditoria' && <Audit />}{current === 'config' && member.role === 'admin' && <Settings />}
       </>}<footer>Grupo Eddias <span>Financeiro · {new Date().getFullYear()}</span></footer></main>
     </div></div>;

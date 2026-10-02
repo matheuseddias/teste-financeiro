@@ -42,7 +42,7 @@ export async function backup(db: Database, tenantId: string, runKey: string) {
   const revision = await db.request('rpc/fin_backup_revision', { p_tenant_id: tenantId });
   const data: Record<string, unknown> = {};
   // Sequencial: uma falha interrompe a coleta, sem produzir snapshot parcial.
-  for (const table of ['fin_tenants', 'fin_memberships', 'fin_companies', 'fin_bank_accounts', 'fin_plans', 'fin_commitments', 'fin_audit_log'])
+  for (const table of ['fin_tenants', 'fin_memberships', 'fin_companies', 'fin_bank_accounts', 'fin_plans', 'fin_commitments', 'fin_transactions', 'fin_allocations', 'fin_import_profiles', 'fin_audit_log'])
     data[table] = await db.rows(table, tenantId);
   const after = await db.request('rpc/fin_backup_revision', { p_tenant_id: tenantId });
   if (typeof revision !== 'string' || revision !== after) throw new HttpError(409, 'Cadastros alterados durante o backup. Tente novamente.');

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Plus, TrendingUp } from 'lucide-react';
-import { access, blankPlan, money, project, scenarioVariant, type Plan, type PlanInput, type Projection } from '@eddias/core';
+import { access, blankPlan, money, project, scenarioVariant, updatedProjection, type Plan, type PlanInput, type Projection } from '@eddias/core';
 import { useStore } from '../../domain/store';
 import { useAuth } from '../../app/auth';
 import { message } from '../../data/client';
 import { Empty, Notice, useDraft } from '../../ui';
 import { Premises } from './Premises';
+import { Actuals } from './Actuals';
 import { Results } from './Results';
 import { monthLabel } from './fields';
 export function Planning() {
@@ -15,7 +16,7 @@ export function Planning() {
   const canEdit = access(member, 'planejamento') === 'edit';
   function select(id: string) { if (!document.querySelector('form[data-dirty="true"]') || window.confirm('Trocar de cenário? O rascunho ficará salvo neste dispositivo.')) setSelected(id); }
   return <><div className="page-heading"><div><p className="eyebrow">PLANEJE OS PRÓXIMOS MESES</p><h1>Projeções de caixa</h1><p>Do GMV ao dinheiro que chega à conta.</p></div>{canEdit && <button onClick={() => select('new')}><Plus size={18} />Novo cenário</button>}</div>
-    <Notice>Premissas manuais · consolidado do grupo. A integração de vendas e a conciliação bancária ainda não alimentam automaticamente esta projeção.</Notice>
+    <Notice>Consolidado do grupo · GMV e conversão em caixa informados manualmente. Extratos classificados e conciliados podem atualizar o caixa.</Notice>
     {!!plans.length && <div className="scenario-bar"><label>Cenário<select aria-label="Cenário" value={selected === 'new' ? 'new' : active?.id || ''} onChange={e => select(e.target.value)}>{selected === 'new' && <option value="new">Novo cenário</option>}{plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label><span className="badge"><TrendingUp size={14} />{plans.length} cenário(s) salvo(s)</span></div>}
     {!active && selected !== 'new' ? <Empty title="Seu primeiro cenário de caixa">Crie um cenário, informe o GMV dos canais e o percentual que efetivamente chega ao banco. Depois acrescente custos e fornecedores.</Empty> : <Workspace key={active ? active.id + ':' + active.version : 'new'} plan={active || null} canEdit={canEdit} saved={setSelected} />}
   </>;
@@ -26,9 +27,9 @@ function Workspace({ plan, canEdit, saved }: { plan: Plan | null; canEdit: boole
     id: plan?.id || crypto.randomUUID(), version: plan?.version || 0, name: plan?.name || 'Cenário base', config: plan?.config || blankPlan(),
   });
   const v = canEdit ? draft.value : { id: plan!.id, version: plan!.version, name: plan!.name, config: plan!.config };
-  const [error, setError] = useState(''); const [compareId, setCompareId] = useState('');
-  let result: Projection | undefined; let calculationError = '';
-  try { result = project(v.config, data?.commitments); } catch (e) { calculationError = message(e); }
+  const [error, setError] = useState(''); const [compareId, setCompareId] = useState(''); const [withActual, setWithActual] = useState(false);
+  let result: Projection | undefined; let baseline: Projection | undefined; let calculationError = '';
+  try { baseline = project(v.config, data?.commitments); result = withActual ? updatedProjection(baseline, v.config.opening_cents, data?.commitments || [], data?.transactions || [], data?.allocations || []) : baseline; } catch (e) { calculationError = message(e); }
   function change(config: PlanInput) { draft.update({ ...v, config }); }
   async function clone(kind: 'copy' | 'stress' | 'growth') {
     setError('');
@@ -41,7 +42,7 @@ function Workspace({ plan, canEdit, saved }: { plan: Plan | null; canEdit: boole
     } catch (e) { setError(message(e)); }
   }
   const other = data?.plans.find(p => p.id === compareId);
-  let comparison: Projection | undefined; try { if (other) comparison = project(other.config, data?.commitments); } catch { /* O próprio cenário mostra o erro ao ser aberto. */ }
+  let comparison: Projection | undefined; try { if (other) { comparison = project(other.config, data?.commitments); if (withActual) comparison = updatedProjection(comparison, other.config.opening_cents, data?.commitments || [], data?.transactions || [], data?.allocations || []); } } catch { /* O próprio cenário mostra o erro ao ser aberto. */ }
   return <>{error && <Notice error>{error}</Notice>}<details className="card" open={!plan || undefined}><summary><strong>Premissas · {v.name}</strong><span className="muted">{draft.dirty && canEdit ? 'Rascunho não salvo' : canEdit ? 'Abrir para editar' : 'Consultar premissas'}</span></summary>
     <form data-dirty={canEdit && draft.dirty} onSubmit={async e => { e.preventDefault(); setError(''); try {
       project(v.config, data?.commitments);
@@ -56,6 +57,9 @@ function Workspace({ plan, canEdit, saved }: { plan: Plan | null; canEdit: boole
       {canEdit && <p className="muted">Conservador: GMV −20%, líquido −3 pontos percentuais e repasse +7 dias. Crescimento: GMV +10%. São hipóteses editáveis, não recomendações.</p>}
       {v.config.opening_cents === null && <Notice>Saldo inicial não informado. A movimentação mensal é calculada, mas o saldo acumulado permanece indisponível.</Notice>}
       {v.config.channels.some(c => c.net_bps === 0 && c.gmv_cents.some(n => n > 0)) && <Notice error>Há canal com GMV e percentual líquido de 0%. Confira essa premissa antes de usar a projeção.</Notice>}
+      <label className="checkbox"><input type="checkbox" checked={withActual} onChange={e => setWithActual(e.target.checked)} />Atualizar a projeção com os extratos classificados e conciliados</label>
+      {withActual && <Notice>Alocações retiram a parcela prevista na data original e incluem o movimento na data bancária. Repasses e despesas operacionais classificados abatem estimativas do mesmo mês. Movimentos sem classificação podem se sobrepor às previsões até serem conciliados. Confira a cobertura dos extratos.</Notice>}
+      {baseline && <Actuals projection={baseline} />}
       <Results result={result} p={v.config} name={v.name} />
       {!!data?.plans.filter(p => p.id !== plan?.id).length && <section className="card"><h2>Comparar com outro cenário</h2><label>Cenário de comparação<select aria-label="Cenário de comparação" value={compareId} onChange={e => setCompareId(e.target.value)}><option value="">Selecione</option>{data?.plans.filter(p => p.id !== plan?.id).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
         {comparison && <div className="table-scroll"><table className="data-table"><thead><tr><th>Mês</th><th>{v.name} · saldo</th><th>{other?.name} · saldo</th><th>Diferença</th></tr></thead><tbody>{result.months.map(m => { const b = comparison.months.find(b => b.month === m.month); return <tr key={m.month}><th>{monthLabel(m.month)}</th><td>{money(m.closing)}</td><td>{b ? money(b.closing) : 'Fora do período'}</td><td>{money(b && b.closing !== null && m.closing !== null ? m.closing - b.closing : null)}</td></tr>; })}</tbody></table></div>}

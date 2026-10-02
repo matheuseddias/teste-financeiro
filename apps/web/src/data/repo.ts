@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment } from '@eddias/core';
+import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment, type BankTransaction, type Allocation, type ImportProfile } from '@eddias/core';
 export class Repo {
   constructor(readonly client: SupabaseClient, readonly member: Membership) {}
   async rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
@@ -19,15 +19,18 @@ export class Repo {
     }
   }
   async load(): Promise<Snapshot> {
-    const [companies, accounts, memberships, plans, commitments] = await Promise.all([
-      access(this.member, 'empresas') !== 'none' || access(this.member, 'contas') !== 'none' || access(this.member, 'planejamento') !== 'none'
+    const [companies, accounts, memberships, plans, commitments, transactions, allocations, profiles] = await Promise.all([
+      access(this.member, 'empresas') !== 'none' || access(this.member, 'contas') !== 'none' || access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none'
         ? this.all<Company>('fin_companies') : [],
-      access(this.member, 'contas') !== 'none' ? this.all<BankAccount>('fin_bank_accounts') : [],
+      access(this.member, 'contas') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<BankAccount>('fin_bank_accounts') : [],
       this.member.role === 'admin' ? this.rpc<Membership[]>('fin_members') : [],
       access(this.member, 'planejamento') !== 'none' ? this.all<Plan>('fin_plans') : [],
-      access(this.member, 'planejamento') !== 'none' ? this.all<Commitment>('fin_commitments') : [],
+      access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<Commitment>('fin_commitments') : [],
+      access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<BankTransaction>('fin_transactions') : [],
+      access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<Allocation>('fin_allocations') : [],
+      access(this.member, 'extratos') !== 'none' ? this.all<ImportProfile>('fin_import_profiles') : [],
     ]);
-    return { companies, accounts, memberships, plans, commitments };
+    return { companies, accounts, memberships, plans, commitments, transactions, allocations, profiles };
   }
   saveCompany(value: { id: string; name: string; document: string; version: number }) {
     return this.rpc<Company>('fin_save_company', { p_id: value.id, p_name: value.name,
