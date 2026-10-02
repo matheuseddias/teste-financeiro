@@ -19,10 +19,12 @@ sql() { dk exec -i "$name" psql -X -h /tmp -U postgres -d postgres -v ON_ERROR_S
 sql < "$root/supabase/tests/stubs.sql"
 for file in "$root"/supabase/migrations/*.sql; do sql < "$file"; done
 sql < "$root/supabase/tests/foundation.sql"
+sql < "$root/supabase/tests/planning.sql"
 sql < "$root/supabase/tests/backups.sql"
 fingerprint="select md5(string_agg(data::text,',' order by data::text)) from (
  select to_jsonb(t) data from public.fin_tenants t union all select to_jsonb(t) from public.fin_memberships t
  union all select to_jsonb(t) from public.fin_companies t union all select to_jsonb(t) from public.fin_bank_accounts t
+ union all select to_jsonb(t) from public.fin_plans t union all select to_jsonb(t) from public.fin_commitments t
  union all select to_jsonb(t) from public.fin_audit_log t) all_rows;"
 before="$(printf '%s' "$fingerprint" | sql -At)"
 for file in "$root"/supabase/migrations/*.sql; do sql < "$file"; done

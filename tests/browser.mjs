@@ -7,10 +7,10 @@ let browser;
 try {
   for (let i = 0; i < 40; i++) { try { if ((await fetch(url)).ok) break; } catch {} await new Promise(r => setTimeout(r, 100)); }
   browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
-  const context = await browser.newContext(); const page = await context.newPage(); const failures = [];
+  const context = await browser.newContext(); const page = await context.newPage(); page.setDefaultTimeout(10000); const failures = [];
   page.on('pageerror', e => failures.push(e.message));
   const tenant = 'edd1a500-0000-4000-8000-000000000001'; const user = { id: '11111111-1111-4111-8111-111111111111', email: 'admin@example.test', aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {}, created_at: '2026-10-01' };
-  const companies = []; const accounts = []; let role = 'admin'; let saveAccountCalls = 0;
+  const companies = []; const accounts = []; const plans = []; const commitments = []; let role = 'admin'; let saveAccountCalls = 0;
   await page.route('**/api/config', route => route.fulfill({ json: { environment: 'preview', supabaseUrl: 'https://testfixture.supabase.co', supabasePublishableKey: 'sb_publishable_test' } }));
   await page.route('https://testfixture.supabase.co/**', async route => {
     const req = route.request(); const path = new URL(req.url()).pathname; const b = req.postDataJSON();
@@ -18,6 +18,9 @@ try {
     if (path === '/auth/v1/token') data = { access_token: 'test-session', refresh_token: 'refresh-test', expires_in: 3600, token_type: 'bearer', user };
     else if (path === '/auth/v1/user') data = user;
     else if (path.endsWith('/fin_my_workspaces')) data = [{ tenant_id: tenant, user_id: user.id, role, active: true, permissions: { contas: 'view', empresas: 'view' }, workspace_name: 'Grupo Eddias' }];
+    else if (path.endsWith('/fin_plans')) data = plans;
+    else if (path.endsWith('/fin_commitments')) data = commitments;
+    else if (path.endsWith('/fin_save_plan')) { const previous = plans.findIndex(p => p.id === b.p_id); data = { id: b.p_id, name: b.p_name, config: b.p_config, version: b.p_version + 1, tenant_id: tenant, deleted_at: null }; if (previous >= 0) plans[previous] = data; else plans.push(data); }
     else if (path.endsWith('/fin_members')) data = [];
     else if (path.endsWith('/fin_companies')) data = companies;
     else if (path.endsWith('/fin_bank_accounts')) data = accounts;
@@ -39,6 +42,42 @@ try {
   await page.getByRole('button', { name: 'Contas bancárias', exact: true }).click(); await page.getByRole('button', { name: 'Cadastrar conta', exact: true }).click();
   await expect(page.getByLabel('Nome da conta')).toHaveValue('Kamino teste'); await expect(page.locator('form[data-dirty="true"]')).toHaveCount(1);
   await page.getByRole('button', { name: 'Salvar conta', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Kamino teste' })).toBeVisible(); expect(accounts[0].reference_balance_cents).toBe(12345);
+  await page.getByRole('button', { name: 'Projeções de caixa', exact: true }).click();
+  await page.getByRole('button', { name: 'Novo cenário', exact: true }).click();
+  await page.getByLabel('Mês inicial', { exact: true }).fill('2026-10');
+  await page.getByLabel('Meses de projeção').selectOption('3');
+  await page.getByLabel('Saldo inicial do grupo (R$)', { exact: true }).fill('10000');
+  await page.getByLabel('Fornecedores estimados (% do GMV)', { exact: true }).fill('30');
+  await page.getByRole('button', { name: 'Adicionar canal', exact: true }).click();
+  await page.getByLabel('Nome do canal', { exact: true }).fill('Marketplace teste');
+  await page.getByLabel('Percentual líquido Marketplace teste', { exact: true }).fill('80');
+  await page.getByLabel('Marketplace teste out. de 26', { exact: true }).fill('100000');
+  await page.getByRole('button', { name: 'Repetir GMV do primeiro mês', exact: true }).click();
+  await page.getByRole('button', { name: 'Adicionar custo', exact: true }).click();
+  await page.getByLabel('Descrição do custo', { exact: true }).fill('Equipe teste');
+  await page.getByLabel('Equipe teste out. de 26', { exact: true }).fill('10000');
+  await page.getByRole('button', { name: 'Repetir custo do primeiro mês', exact: true }).click();
+  await page.getByRole('button', { name: 'Salvar cenário', exact: true }).click();
+  await expect(page.getByText('Cenário salvo · Cenário base', { exact: true })).toBeVisible();
+  expect(plans[0].config.channels[0].gmv_cents).toEqual([10000000,10000000,10000000]);
+  await expect(page.locator('.projection-stats').getByText(/130.000,00/)).toBeVisible();
+  await page.getByRole('button', { name: 'Criar conservador', exact: true }).click();
+  await expect(page.getByText('Cenário salvo · Cenário base · conservador', { exact: true })).toBeVisible();
+  expect(plans[1].config.channels[0].net_bps).toBe(7700);
+  expect(plans[1].config.channels[0].lag_days).toBe(7);
+  expect(plans[0].config.channels[0].net_bps).toBe(8000);
+  await page.getByLabel('Cenário de comparação', { exact: true }).selectOption(plans[0].id);
+  await page.reload(); await page.getByRole('button', { name: 'Projeções de caixa', exact: true }).click();
+  await expect(page.getByText('Cenário salvo · Cenário base', { exact: true })).toBeVisible();
+  const downloadPromise = page.waitForEvent('download'); await page.getByRole('button', { name: 'Exportar CSV', exact: true }).click();
+  expect((await downloadPromise).suggestedFilename()).toBe('projecao-caixa.csv');
+  await mkdir('.data/validation', { recursive: true });
+  await page.screenshot({ path: '.data/validation/projecoes-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '.data/validation/projecoes-mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.getByRole('button', { name: 'Contas bancárias', exact: true }).click();
   await page.getByRole('button', { name: 'Usar tema escuro' }).click(); await expect(page.locator('.app.dark')).toHaveCount(1);
   await mkdir('.data/validation', { recursive: true }); await page.screenshot({ path: '.data/validation/f1-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 }); await expect(page.getByRole('heading', { name: 'Kamino teste' })).toBeVisible();
@@ -47,5 +86,5 @@ try {
   role = 'membro'; await page.reload(); await page.getByRole('button', { name: 'Abrir menu' }).click();
   await expect(page.getByRole('button', { name: 'Configurações', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Contas bancárias', exact: true }).click(); await expect(page.getByRole('button', { name: 'Cadastrar conta', exact: true })).toHaveCount(0);
-  expect(failures).toEqual([]); console.log('Navegador: login, empresas, contas, validação, rascunho, tema, mobile e perfil de leitura aprovados (API simulada).');
+  expect(failures).toEqual([]); console.log('Navegador: cadastros, projeções, cenários, comparação, CSV, rascunhos, mobile e perfis aprovados (API simulada).');
 } finally { await browser?.close(); server.kill(); }

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent } from '@eddias/core';
+import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment } from '@eddias/core';
 export class Repo {
   constructor(readonly client: SupabaseClient, readonly member: Membership) {}
   async rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
@@ -19,13 +19,15 @@ export class Repo {
     }
   }
   async load(): Promise<Snapshot> {
-    const [companies, accounts, memberships] = await Promise.all([
-      access(this.member, 'empresas') !== 'none' || access(this.member, 'contas') !== 'none'
+    const [companies, accounts, memberships, plans, commitments] = await Promise.all([
+      access(this.member, 'empresas') !== 'none' || access(this.member, 'contas') !== 'none' || access(this.member, 'planejamento') !== 'none'
         ? this.all<Company>('fin_companies') : [],
       access(this.member, 'contas') !== 'none' ? this.all<BankAccount>('fin_bank_accounts') : [],
       this.member.role === 'admin' ? this.rpc<Membership[]>('fin_members') : [],
+      access(this.member, 'planejamento') !== 'none' ? this.all<Plan>('fin_plans') : [],
+      access(this.member, 'planejamento') !== 'none' ? this.all<Commitment>('fin_commitments') : [],
     ]);
-    return { companies, accounts, memberships };
+    return { companies, accounts, memberships, plans, commitments };
   }
   saveCompany(value: { id: string; name: string; document: string; version: number }) {
     return this.rpc<Company>('fin_save_company', { p_id: value.id, p_name: value.name,
