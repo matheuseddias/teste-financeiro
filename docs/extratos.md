@@ -1,4 +1,4 @@
-# Importação e conciliação — versão 0.4
+# Importação e conciliação — versões 0.4/0.5
 
 ## Uso
 
@@ -27,7 +27,7 @@ A planilha Fluxo de Caixa tem 22 abas, incluindo extratos de vários bancos. **S
 - Desfazer um vínculo usa arquivamento administrativo com simulação; a trava geral de mais de 30% dos registros ativos também se aplica. Essa trava pode bloquear desfazer um dos primeiros vínculos. Não há exclusão silenciosa nem contorno automático.
 - Arquivo/prévia não ficam em armazenamento local persistente: ao fechar é necessário selecionar novamente. Rascunhos de classificação e cenários são locais ao usuário e grupo.
 - Leitura de XLS binário antigo requer salvar como XLSX/CSV. HTML tabular exportado com extensão XLS é aceito; fórmulas usam o resultado já calculado salvo no XLSX.
-- Nenhuma integração externa ou regra aprendida executa conciliações nesta versão. Percentuais de conversão continuam sendo premissas manuais, não indicadores históricos calculados automaticamente.
+- Regras de classificação aprovadas automatizam novos movimentos; vínculos com previsões continuam manuais. Veja [aprendizagem.md](aprendizagem.md). Percentuais de conversão continuam sendo premissas manuais, não indicadores históricos calculados automaticamente.
 - Backup inclui transações, vínculos e perfis. Limite explícito atual: 100 mil registros por tabela; excedê-lo interrompe o snapshot, sem truncar dados. Backup cifrado antes de migração é separado e completo.
 
 ## Evidências

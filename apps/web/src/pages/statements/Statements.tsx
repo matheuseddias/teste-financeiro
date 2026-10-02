@@ -8,22 +8,26 @@ import { Empty, Notice, useDraft } from '../../ui';
 import { categories } from '../planning/fields';
 import { Archive } from '../Companies';
 import { ImportStatement } from './ImportStatement';
+import { Rules } from './Rules';
 const classes = { pendente: 'Não classificado', operacional: 'Operacional', repasse: 'Repasse de vendas', transferencia: 'Transferência entre contas próprias', aporte: 'Aporte', emprestimo: 'Empréstimo' };
 export function Statements() {
   const { data } = useStore(); const { member } = useAuth(); const canEdit = access(member, 'extratos') === 'edit';
   const [importing, setImporting] = useState(false); const [selectedId, setSelected] = useState(''); const [account, setAccount] = useState(''); const [month, setMonth] = useState(''); const [pending, setPending] = useState(false); const [page, setPage] = useState(0);
+  const [rulesOpen, setRulesOpen] = useState(false);
   const rows = (data?.transactions || []).filter(t => (!account || t.account_id === account) && (!month || t.posted_date.startsWith(month)) && (!pending || t.classification === 'pendente')).sort((a, b) => b.posted_date.localeCompare(a.posted_date));
   const selected = data?.transactions.find(t => t.id === selectedId);
   function choose(id: string) { if (!document.querySelector('form[data-dirty="true"]') || window.confirm('Há alterações não salvas. Continuar?')) { setSelected(id); setImporting(false); return true; } return false; }
   return <><div className="page-heading"><div><p className="eyebrow">MOVIMENTAÇÃO BANCÁRIA</p><h1>Extratos e conciliação</h1><p>Confira movimentos e vincule pagamentos e recebimentos às previsões.</p></div>{canEdit && <button onClick={() => { if (choose('')) setImporting(true); }}><Upload size={17} />Importar extrato</button>}</div>
     {importing && <ImportStatement close={() => setImporting(false)} />}
+    {member.role === 'admin' && <div className="actions"><button className="secondary" onClick={() => setRulesOpen(!rulesOpen)}>{rulesOpen ? 'Fechar regras' : 'Regras e sugestões'}</button></div>}
+    {rulesOpen && member.role === 'admin' && <Rules />}
     {selected && <Reconcile key={selected.id + ':' + selected.version} transaction={selected} canEdit={canEdit} close={() => setSelected('')} />}
     <div className="card"><div className="form-grid"><label>Conta bancária<select value={account} onChange={e => { setAccount(e.target.value); setPage(0); }}><option value="">Todas as contas</option>{data?.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></label><label>Mês do extrato<input type="month" value={month} onChange={e => { setMonth(e.target.value); setPage(0); }} /></label></div>
       <label className="checkbox"><input type="checkbox" checked={pending} onChange={e => { setPending(e.target.checked); setPage(0); }} />Somente não classificados</label>
       <p>{rows.length} movimentos · entradas {money(rows.filter(t => t.amount_cents > 0).reduce((s, t) => s + t.amount_cents, 0))} · saídas {money(-rows.filter(t => t.amount_cents < 0).reduce((s, t) => s + t.amount_cents, 0))}. Totais do extrato incluem transferências.</p></div>
     {!rows.length ? <Empty title="Nenhum movimento neste período">Cadastre uma conta e importe seu extrato para começar.</Empty> : <section className="card"><div className="table-scroll"><table className="data-table"><thead><tr><th>Data</th><th>Descrição</th><th>Conta</th><th>Valor</th><th>Classificação</th><th>Vinculado a previsões</th><th>Ação</th></tr></thead><tbody>{rows.slice(page * 100, page * 100 + 100).map(t => {
       const allocated = (data?.allocations || []).filter(a => a.transaction_id === t.id).reduce((s, a) => s + a.amount_cents, 0);
-      return <tr key={t.id}><td>{t.posted_date.split('-').reverse().join('/')}</td><td className="transaction-description">{t.description}</td><td>{data?.accounts.find(a => a.id === t.account_id)?.name}</td><td className={t.amount_cents < 0 ? 'negative' : ''}>{money(t.amount_cents)}</td><td>{classes[t.classification]}{t.channel && <small className="block">{t.channel}</small>}</td><td>{money(allocated)} / {money(Math.abs(t.amount_cents))}</td><td><button className="secondary" onClick={() => choose(t.id)}><Link2 size={14} />{canEdit ? 'Conciliar' : 'Consultar'}</button></td></tr>;
+      return <tr key={t.id}><td>{t.posted_date.split('-').reverse().join('/')}</td><td className="transaction-description">{t.description}</td><td>{data?.accounts.find(a => a.id === t.account_id)?.name}</td><td className={t.amount_cents < 0 ? 'negative' : ''}>{money(t.amount_cents)}</td><td>{classes[t.classification]}{t.rule_id && <small className="block">Regra aprovada</small>}{t.channel && <small className="block">{t.channel}</small>}</td><td>{money(allocated)} / {money(Math.abs(t.amount_cents))}</td><td><button className="secondary" onClick={() => choose(t.id)}><Link2 size={14} />{canEdit ? 'Conciliar' : 'Consultar'}</button></td></tr>;
     })}</tbody></table></div><div className="actions"><button className="secondary" disabled={page === 0} onClick={() => setPage(page - 1)}>Anterior</button><span>Página {page + 1}</span><button className="secondary" disabled={(page + 1) * 100 >= rows.length} onClick={() => setPage(page + 1)}>Próxima</button></div></section>}
   </>;
 }

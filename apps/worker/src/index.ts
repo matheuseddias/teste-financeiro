@@ -4,7 +4,7 @@ export async function handle(request: Request, env: Env, db = new Database(env))
   try {
     const path = new URL(request.url).pathname;
     if (request.method === 'GET' && path === '/api/config') return json(config(env));
-    if (request.method === 'GET' && path === '/api/health') { config(env); return json({ ok: true, version: '0.4.0', environment: env.ENVIRONMENT }); }
+    if (request.method === 'GET' && path === '/api/health') { config(env); return json({ ok: true, version: '0.5.0', environment: env.ENVIRONMENT }); }
     if (path !== '/api/backup') return json({ error: 'Recurso não encontrado.' }, 404);
     if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
     const token = request.headers.get('Authorization');

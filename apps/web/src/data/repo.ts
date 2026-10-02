@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment, type BankTransaction, type Allocation, type ImportProfile } from '@eddias/core';
+import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment, type BankTransaction, type Allocation, type ImportProfile, type ClassificationRule } from '@eddias/core';
 export class Repo {
   constructor(readonly client: SupabaseClient, readonly member: Membership) {}
   async rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
@@ -19,7 +19,7 @@ export class Repo {
     }
   }
   async load(): Promise<Snapshot> {
-    const [companies, accounts, memberships, plans, commitments, transactions, allocations, profiles] = await Promise.all([
+    const [companies, accounts, memberships, plans, commitments, transactions, allocations, profiles, rules] = await Promise.all([
       access(this.member, 'empresas') !== 'none' || access(this.member, 'contas') !== 'none' || access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none'
         ? this.all<Company>('fin_companies') : [],
       access(this.member, 'contas') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<BankAccount>('fin_bank_accounts') : [],
@@ -29,8 +29,9 @@ export class Repo {
       access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<BankTransaction>('fin_transactions') : [],
       access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<Allocation>('fin_allocations') : [],
       access(this.member, 'extratos') !== 'none' ? this.all<ImportProfile>('fin_import_profiles') : [],
+      access(this.member, 'extratos') !== 'none' ? this.all<ClassificationRule>('fin_rules') : [],
     ]);
-    return { companies, accounts, memberships, plans, commitments, transactions, allocations, profiles };
+    return { companies, accounts, memberships, plans, commitments, transactions, allocations, profiles, rules };
   }
   saveCompany(value: { id: string; name: string; document: string; version: number }) {
     return this.rpc<Company>('fin_save_company', { p_id: value.id, p_name: value.name,

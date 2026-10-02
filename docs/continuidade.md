@@ -25,7 +25,7 @@
 
 ## Evidências atualizadas do Prodio
 
-Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. F4 e F6 seguem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.
+Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. F4 segue pendente. A versão 0.5 entrega a primeira automação da F6: sugestões consistentes, aprovação e regras de classificação. Vínculos financeiros automáticos e validação integrada com fontes externas permanecem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.
 
 Referência remota consultada em 01/10/2026: commit `eb9f245`. A cópia local anterior (`a8148ac`) não representava mais o código atual.
 

@@ -1,6 +1,6 @@
 # Projeções para a reunião
 
-O usuário priorizou projeções em 01/10/2026. A entrega antecipa o núcleo de planejamento da F5 com lançamentos da F2, sem depender das integrações da F4. A versão 0.4 acrescenta importação e conciliação da F3. Integrações F4 e aprendizagem F6 continuam pendentes.
+O usuário priorizou projeções em 01/10/2026. A entrega antecipa o núcleo de planejamento da F5 com lançamentos da F2, sem depender das integrações da F4. A versão 0.4 acrescenta importação e conciliação da F3. Integrações F4 continuam pendentes. A versão 0.5 acrescenta regras de classificação aprendidas; a conversão histórica de GMV em caixa ainda não é calculada automaticamente.
 
 ## Como usar
 

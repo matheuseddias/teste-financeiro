@@ -21,7 +21,7 @@ export function ImportStatement({ close }: { close: () => void }) {
   async function prepare(valid: Parameters<typeof identifyRows>[0], skipped: RowIssue[], extras = {}) {
     const rows = await identifyRows(valid); setPreview({ rows, skipped, ...extras }); setExcluded(new Set()); invalidate();
   }
-  return <section className="card editor"><h2>Importar extrato</h2><p>O arquivo permanece no navegador durante a prévia. Somente os movimentos selecionados serão gravados.</p>
+  return <section className="card editor"><h2>Importar extrato</h2><p>O arquivo permanece no navegador durante a prévia. Somente os movimentos selecionados serão gravados. Regras aprovadas serão aplicadas à classificação dos novos movimentos.</p>
     <form data-dirty={dirty} onSubmit={e => e.preventDefault()}><fieldset disabled={busy}><div className="form-grid"><label>Conta do extrato<select aria-label="Conta do extrato" required value={accountId} onChange={e => { setAccount(e.target.value); setSheets([]); setPreview(null); invalidate(); }}><option value="">Selecione a conta</option>{data?.accounts.map(a => <option value={a.id} key={a.id}>{a.name} · {data.companies.find(c => c.id === a.company_id)?.name}</option>)}</select></label>
       <label>Arquivo XLSX, CSV ou OFX<input disabled={!accountId || busy} type="file" accept=".xlsx,.csv,.ofx,.html,.htm,.xls" onChange={async e => {
         const file = e.target.files?.[0]; if (!file) return; setBusy(true); setError(''); setPreview(null); setSheets([]); invalidate();

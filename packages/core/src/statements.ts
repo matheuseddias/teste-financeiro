@@ -3,7 +3,7 @@ import type { Commitment, CostCategory, MonthProjection } from './planning';
 export interface ImportRow { posted_date: string; amount_cents: number; description: string; external_id: string | null; source_key: string; fingerprint: string }
 export interface BankTransaction extends ImportRow {
   id: string; tenant_id: string; account_id: string; classification: 'pendente' | 'operacional' | 'repasse' | 'transferencia' | 'aporte' | 'emprestimo';
-  category: CostCategory | null; channel: string | null; version: number; deleted_at: string | null;
+  category: CostCategory | null; channel: string | null; version: number; deleted_at: string | null; rule_id?: string | null;
 }
 export interface Allocation { id: string; tenant_id: string; transaction_id: string; commitment_id: string; amount_cents: number; deleted_at: string | null }
 export interface ColumnMapping { date: number; description: number; amount: number; debit: number; credit: number; external: number; start: number; fill_date: boolean; invert: boolean; format: 'br' | 'decimal' }
