@@ -23,6 +23,20 @@
 | F5 | Projeções e cenários | GMV projetado por canal, conversão em dinheiro, prazo de repasse, obrigações conhecidas, compras estimadas e custos; comparação projetado × realizado e hipóteses editáveis. |
 | F6 | Aprendizagem, automação e validação integrada | Sugestões baseadas em confirmações; aprovação administrativa e rastreabilidade; rotinas idempotentes; fluxo completo validado e limitações registradas. |
 
+## Publicação confirmada em 02/10/2026
+
+| Versão | Commit | GitHub Actions | Entrega |
+| --- | --- | --- | --- |
+| 0.3 | `0e6c5ab` | [37072852604](https://github.com/matheuseddias/teste-financeiro/actions/runs/37072852604) | Projeções e lançamentos previstos |
+| 0.4 | `0d74fe1` | [37075910059](https://github.com/matheuseddias/teste-financeiro/actions/runs/37075910059) | Extratos, conciliação e comparação com realizado |
+| 0.5 | `1678938` | [37076898055](https://github.com/matheuseddias/teste-financeiro/actions/runs/37076898055) | Regras de classificação aprendidas e aprovadas |
+
+As três execuções concluíram testes, backup cifrado externo, ensaio, migração e publicação. HTTPS remoto da 0.5: site e assets 200, health 0.5.0/production, regras anônimas 401 e backup sem sessão 401. Migrações 1–6 aplicadas e imutáveis. Login real do administrador não foi exercitado.
+
+Validação local da 0.5: 29 testes Vitest, 17 da trava SQL, PostgreSQL real, backup/restauração/reaplicação, workerd e navegador com API simulada, inclusive bundle de produção. O XLSX real Kamino foi somente lido em memória; nenhuma movimentação dele foi gravada em produção.
+
+Pendente para integração: confirmar nome/ID da empresa Eddias no Prodio e configuração das credenciais de API Kamino. A pergunta foi enviada ao usuário. O Worker Financeiro não tinha bindings Kamino na consulta de nomes/tipos em 02/10; isso não comprova ausência dos secrets no GitHub. Nenhuma alteração foi feita no Prodio. F4, conversão histórica automática e conciliação automática com obrigações não estão entregues; as premissas de projeção seguem manuais.
+
 ## Evidências atualizadas do Prodio
 
 Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. F4 segue pendente. A versão 0.5 entrega a primeira automação da F6: sugestões consistentes, aprovação e regras de classificação. Vínculos financeiros automáticos e validação integrada com fontes externas permanecem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.
