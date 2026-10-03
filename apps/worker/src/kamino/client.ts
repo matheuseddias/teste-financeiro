@@ -13,7 +13,8 @@ export function readiness(env: Env, slot: KaminoSlot) {
 }
 export class KaminoClient {
  private base: URL; private headers: Record<string,string>;
- constructor(env: Env, slot: KaminoSlot, private fetcher: typeof fetch = fetch) {
+ // Wrapper preserva o contexto global exigido por fetch no runtime Workers.
+ constructor(env: Env, slot: KaminoSlot, private fetcher: typeof fetch = (...args) => fetch(...args)) {
   if (!readiness(env,slot).configured) throw new HttpError(503,'Credenciais Kamino ainda não configuradas para esta conexão.');
   const values=env as unknown as Record<string,string>; const prefix=slot==='principal'?'KAMINO_':'KAMINO_HOME_';
   try { this.base=new URL(values[prefix+'API_BASE']); } catch { throw new HttpError(503,'URL da API Kamino inválida.'); }
