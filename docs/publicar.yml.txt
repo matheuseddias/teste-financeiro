@@ -4,6 +4,12 @@ on:
   push:
     branches: ['main']
   workflow_dispatch:
+    inputs:
+      retomar_kamino:
+        description: 'Testar e reativar fontes existentes desta conexão Kamino'
+        type: choice
+        default: nenhuma
+        options: [nenhuma, principal, home]
 permissions:
   contents: read
 concurrency:
@@ -26,6 +32,7 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DEPLOY_ENVIRONMENT: production
+      KAMINO_RESUME_SLOT: ${{ inputs.retomar_kamino || 'nenhuma' }}
       BANCO_URL: ${{ secrets.BANCO_URL }}
       BACKUP_SENHA: ${{ secrets.BACKUP_SENHA }}
       SUPABASE_URL: ${{ vars.SUPABASE_URL }}

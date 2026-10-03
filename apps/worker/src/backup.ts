@@ -19,7 +19,8 @@ export class Database {
         if (!retry || attempt === 2) throw new HttpError(502, 'Banco indisponível. Tente novamente.');
         await this.deps.sleep(2000); continue;
       }
-      if (r.ok) return r.json();
+      // Funções SQL RETURNS void respondem 204; a operação já foi concluída.
+      if (r.ok) return r.status === 204 ? null : r.json();
       if (retry && attempt < 2 && (r.status === 429 || r.status >= 500)) { await this.deps.sleep(2000); continue; }
       throw new HttpError(r.status === 401 || r.status === 403 ? 403 : 502, 'Não foi possível concluir a operação no banco.');
     }

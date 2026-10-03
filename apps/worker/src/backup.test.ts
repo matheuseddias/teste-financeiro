@@ -25,6 +25,11 @@ describe('isolamento de ambientes e credenciais', () => {
   });
 });
 describe('snapshots completos', () => {
+  it('aceita confirmação vazia de RPC sem repetir uma operação já gravada', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 204 }));
+    await expect(new Database(env, deps(fetcher)).request('rpc/fin_kamino_finish', { p_probe: true })).resolves.toBeNull();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
   it('pagina sem truncar e tenta falhas transitórias até três vezes', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(new Response('', { status: 503 }))
       .mockResolvedValueOnce(Response.json(Array.from({ length: 1000 }, (_, id) => ({ id }))))

@@ -1,5 +1,5 @@
 // Executado somente no GitHub após publicação, com os mesmos segredos do Worker.
-// Inicializa fontes novas; nunca reativa uma conexão que o usuário já pausou.
+// Inicializa fontes novas. Retomada de fontes existentes exige opção explícita no Actions.
 import { Database } from '../backup';
 import { config, type Env } from '../config';
 import { kaminoTenant,readiness } from './client';
@@ -9,6 +9,8 @@ async function main() {
  const env={...process.env,ENVIRONMENT:process.env.DEPLOY_ENVIRONMENT} as Env;config(env);
  if(!readiness(env,'principal').configured){console.log('Kamino: credenciais não disponíveis neste deploy; nenhuma consulta iniciada.');return;}
  const db=new Database(env);const before=await db.rows('fin_kamino_sources',kaminoTenant) as unknown as KaminoSource[];
+ const resume=process.env.KAMINO_RESUME_SLOT||'nenhuma';
+ if(!['nenhuma','principal','home'].includes(resume))throw new Error('Opção de retomada inválida.');
  const initialized:{slot:string;kind:string}[]=[];
  async function waitForSlot() {
   for(let attempt=0;attempt<8;attempt++){
@@ -20,7 +22,7 @@ async function main() {
   throw new Error('Kamino: consulta concorrente ou intervalo prolongado; retome pela tela.');
  }
  for(const slot of ['principal','home'] as const)for(const kind of ['pagamentos','notas'] as const){
-  if(!readiness(env,slot).configured||before.some(s=>s.slot===slot&&s.kind===kind))continue;
+  if(!readiness(env,slot).configured||(resume!==slot&&before.some(s=>s.slot===slot&&s.kind===kind)))continue;
   await waitForSlot();await syncKamino(env,db,kaminoTenant,slot,kind,true);console.log('Kamino: leitura validada para '+slot+'/'+kind+'.');
   await waitForSlot();await syncKamino(env,db,kaminoTenant,slot,kind,false);console.log('Kamino: primeiro lote armazenado para '+slot+'/'+kind+'.');
   initialized.push({slot,kind});

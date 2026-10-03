@@ -35,11 +35,11 @@ As três execuções concluíram testes, backup cifrado externo, ensaio, migraç
 
 Validação local da 0.5: 29 testes Vitest, 17 da trava SQL, PostgreSQL real, backup/restauração/reaplicação, workerd e navegador com API simulada, inclusive bundle de produção. O XLSX real Kamino foi somente lido em memória; nenhuma movimentação dele foi gravada em produção.
 
-Pendente para integração: confirmar nome/ID da empresa Eddias no Prodio e configuração das credenciais de API Kamino. A pergunta foi enviada ao usuário. O Worker Financeiro não tinha bindings Kamino na consulta de nomes/tipos em 02/10; isso não comprova ausência dos secrets no GitHub. Nenhuma alteração foi feita no Prodio. F4, conversão histórica automática e conciliação automática com obrigações não estão entregues; as premissas de projeção seguem manuais.
+O usuário confirmou as seis credenciais Kamino em `financeiro-producao`; a execução de diagnóstico `37090289661` comprovou acesso real às duas APIs. A consulta de notas do dia estava vazia. O foco autorizado nesta retomada é Kamino; Prodio permanece pendente, sem alterações nesta etapa. Conversão histórica automática e conciliação automática com obrigações permanecem pendentes; as premissas de projeção seguem manuais.
 
 ## Evidências atualizadas do Prodio
 
-Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. F4 segue pendente. A versão 0.5 entrega a primeira automação da F6: sugestões consistentes, aprovação e regras de classificação. Vínculos financeiros automáticos e validação integrada com fontes externas permanecem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.
+Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. A parte Prodio da F4 segue pendente. A versão 0.5 entrega a primeira automação da F6: sugestões consistentes, aprovação e regras de classificação. Vínculos financeiros automáticos e validação integrada com fontes externas permanecem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.
 
 Referência remota consultada em 01/10/2026: commit `eb9f245`. A cópia local anterior (`a8148ac`) não representava mais o código atual.
 
@@ -54,7 +54,7 @@ Referência remota consultada em 01/10/2026: commit `eb9f245`. A cópia local an
 
 Documentação autenticada consultada; senha da documentação não é credencial de API. Não guardar senhas, cookies, chaves ou respostas financeiras neste documento ou no Git.
 
-API exige URL específica da empresa e cabeçalhos App, CN, IDUsr, Usr e Hash. Configuração orientada para o environment `financeiro-producao`: `KAMINO_API_BASE`, `KAMINO_APP`, `KAMINO_CN`, `KAMINO_IDUSR`, `KAMINO_USR`, `KAMINO_HASH`. Se houver conexão separada da Home, usar prefixo `KAMINO_HOME_`. Esta orientação ainda precisa ser implementada no deploy da F4; não representa chaves já disponíveis.
+API exige URL específica da empresa e cabeçalhos App, CN, IDUsr, Usr e Hash. Configuração orientada para o environment `financeiro-producao`: `KAMINO_API_BASE`, `KAMINO_APP`, `KAMINO_CN`, `KAMINO_IDUSR`, `KAMINO_USR`, `KAMINO_HASH`. Se houver conexão separada da Home, usar prefixo `KAMINO_HOME_`. O deploy 0.6 envia os conjuntos completos aos secrets do Worker. Não copiar credenciais para o navegador ou para o ambiente local. O usuário confirmou o conjunto principal; Home é opcional.
 
 Consultas documentadas: `/api/financeiro/pagamento/lista/paginada`, `/api/notafiscal/entrada/lista`, `/api/financeiro/unidadenegocio/lista`, `/api/financeiro/contabanco/lista` e `/api/financeiro/movimentoFinanceiro/lista`.
 
@@ -67,6 +67,6 @@ Limite documentado de 20 requisições/minuto por cliente (CN), compartilhado co
 - Transferências próprias, empréstimos e aportes não compõem conversão de GMV em receita líquida de caixa. Taxas já retidas no repasse não podem ser subtraídas novamente da projeção líquida.
 - Uma obrigação representada por compra, NF-e e conta a pagar deve ser vinculada entre fontes, sem triplicar saídas previstas.
 - Saldo/data de referência são necessários para projeção de saldo absoluto; sem eles, mostrar movimentação e a pendência do saldo inicial.
-- Credenciais e permissões reais da Kamino ainda não foram validadas. Acesso de leitura real ao Prodio e cobertura do histórico também permanecem pendentes.
+- Credenciais Kamino e acesso às duas listas foram validados. Cobertura histórica depende da conclusão dos ciclos de sincronização. Acesso de leitura real ao Prodio permanece pendente.
 - Não foi recebido OFX real; testes com exemplos sintéticos não substituem validação do arquivo do banco utilizado.
 - Migrações já publicadas são imutáveis. Cada fase acrescenta migrações, executa testes, backup cifrado e ensaio antes da publicação.
