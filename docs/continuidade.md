@@ -51,6 +51,18 @@ A revisão de títulos abertos por empresa/categoria inclui ou atualiza as previ
 
 O diagnóstico [37093564529](https://github.com/matheuseddias/teste-financeiro/actions/runs/37093564529), às 00h33 de Brasília, confirmou **execuções automáticas reais após o deploy**, com avanço para 300 títulos/página 4 e 15 notas/04 de setembro; ambas as fontes ativas e sem erro. A chamada de fetch com contexto incorreto no Workers foi reproduzida no workerd, corrigida e coberta por regressão. Primeiro ciclo completo continua em processamento.
 
+## Prodio e histórico 0.7 — implementação e validação local
+
+O usuário forneceu o contrato público v1 antecipado e informou que entregará o token amanhã. A ideia anterior de ponte privada foi abandonada antes de alterar código Prodio. Referência Prodio segue limpa em `e7c5a47`; somente o Financeiro foi implementado.
+
+Cliente somente GET, identidade da empresa fixada após `/eu`, quatro escopos de leitura, cursor opaco, carga incremental com sobreposição, limite/lease global, backoff e pausa. Tela Prodio permite consultar estado e documentos, testar e controlar leitura. OC/NF permanecem referências; títulos Kamino revisados alimentam previsões sem duplicar saída. Canal opcional ainda não confirmado no contrato; ausência permanece explícita.
+
+Projeções agora incluem histórico GMV × repasses por janela deslocada pelo prazo informado. Após primeiro ciclo completo, janela encerrada e revisão explícita, cria cenário novo editável com taxa histórica estimada, GMV-base repetido e custos opcionais de referência. Não atribui cada depósito a pedidos nem modifica cenários existentes. Sem token e extratos conferidos, a análise real continua pendente.
+
+Validação local: 48 testes Vitest + 17 de trava SQL; PostgreSQL real com RLS, versão, lease, idempotência, empresa fixada, atualização fora de ordem, backoff e lista vazia; backup/restauração/ensaio/reaplicação; workerd real com respostas externas simuladas. Quatro suítes de navegador passaram com API simulada, incluindo ausência de token, histórico parcial bloqueado, taxa de 80%, confirmação e criação de cenário. Os mocks das telas existentes foram atualizados para as duas novas tabelas. Nenhum dado de teste foi enviado à produção.
+
+Ativação amanhã: secret `PRODIO_API_TOKEN` em GitHub `financeiro-producao`, token da empresa Eddias com pedidos:ler, compras:ler, notas:ler e custos:ler; executar Publicar Financeiro. A API deve disponibilizar as rotas E2. Detalhes em [prodio.md](prodio.md). Publicação 0.7 ainda precisa de confirmação no Actions antes de ser considerada entregue; migração 8 permanece não aplicada neste registro.
+
 ## Evidências atualizadas do Prodio
 
 Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. A parte Prodio da F4 segue pendente. A versão 0.5 entrega a primeira automação da F6: sugestões consistentes, aprovação e regras de classificação. Vínculos financeiros automáticos e validação integrada com fontes externas permanecem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.

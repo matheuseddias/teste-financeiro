@@ -2,7 +2,7 @@
 
 Reconstrução para substituir a manutenção de planilhas: planejar caixa a partir do GMV, estimar quanto efetivamente chega às contas e comparar projetado com realizado conciliado.
 
-A **F1** implementa a fundação: acesso, empresas, contas bancárias, permissões, auditoria e backups. Importação, conciliação e projeção não fazem parte desta entrega. Decisões e limites em [docs/F1.md](docs/F1.md); publicação em [docs/publicacao.md](docs/publicacao.md).
+O sistema inclui cadastros e acesso, projeções e cenários, lançamentos previstos, importação de extratos, conciliação, regras de classificação aprovadas e integração de leitura Kamino. A versão 0.7 prepara a API Prodio e a análise histórica GMV × repasses; a leitura real do Prodio depende do token e da publicação das rotas E2. Estado e evidências em [docs/continuidade.md](docs/continuidade.md), ativação em [docs/prodio.md](docs/prodio.md) e publicação em [docs/publicacao.md](docs/publicacao.md).
 
 ## Estrutura
 

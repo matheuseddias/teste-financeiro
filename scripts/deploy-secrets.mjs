@@ -1,5 +1,6 @@
 // Saída destinada EXCLUSIVAMENTE ao pipe de wrangler secret bulk, nunca ao log.
 const names=['SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY'];
+if(process.env.PRODIO_API_TOKEN?.trim())names.push('PRODIO_API_TOKEN');
 for(const prefix of ['KAMINO_','KAMINO_HOME_']){
  const group=['API_BASE','APP','CN','IDUSR','USR','HASH'].map(k=>prefix+k);
  const present=group.filter(k=>process.env[k]?.trim());

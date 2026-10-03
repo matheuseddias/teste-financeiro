@@ -18,7 +18,7 @@ O usuário priorizou projeções em 01/10/2026. A entrega antecipa o núcleo de 
 - Fornecedores e impostos: o maior valor entre o detalhamento conhecido e a estimativa percentual do GMV, calculado por categoria/mês. Trata-se de cobertura agregada; a vinculação entre compras, notas e contas a pagar depende da integração/conciliador.
 - Custos fixos e outras saídas são somados às obrigações do mês. Taxas já descontadas no percentual líquido não devem ser descontadas novamente.
 - Saldo final = saldo inicial + entradas − saídas acumuladas. O menor saldo exibido considera o inicial e os fechamentos mensais, não o menor saldo intramês.
-- Todos os percentuais são premissas manuais explícitas, não métricas históricas aprendidas. Não há sincronização automática de vendas. Extratos são importados por arquivo na tela Extratos e conciliação.
+- Os percentuais permanecem premissas editáveis. A versão 0.7 acrescenta análise histórica por janela GMV × repasses, com criação de um novo cenário após revisão de cobertura e prazo; depende de vendas sincronizadas via API Prodio e de extratos classificados. Não é atribuição individual de depósitos a pedidos. Consulte [prodio.md](prodio.md). Extratos são importados por arquivo na tela Extratos e conciliação.
 - Conservador: GMV −20%, percentual líquido −3 pontos percentuais, repasse +7 dias. Crescimento: GMV +10%. Variações são hipóteses editáveis, não recomendações.
 - Cenários, lançamentos e alterações são persistidos no Supabase com RLS, permissão própria de planejamento, controle de versão e auditoria. Administrador administra as permissões. Rascunhos permanecem neste dispositivo até salvar.
 - Backup diário e pré-deploy incluem as novas tabelas; retenção dos snapshots permanece em 20.

@@ -3,6 +3,7 @@ export interface Env {
   SUPABASE_URL: string;
   SUPABASE_PUBLISHABLE_KEY: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  PRODIO_API_TOKEN?: string;
   KAMINO_API_BASE?: string; KAMINO_APP?: string; KAMINO_CN?: string; KAMINO_IDUSR?: string; KAMINO_USR?: string; KAMINO_HASH?: string;
   KAMINO_HOME_API_BASE?: string; KAMINO_HOME_APP?: string; KAMINO_HOME_CN?: string; KAMINO_HOME_IDUSR?: string; KAMINO_HOME_USR?: string; KAMINO_HOME_HASH?: string;
 }

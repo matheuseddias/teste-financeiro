@@ -10,6 +10,10 @@ on:
         type: choice
         default: nenhuma
         options: [nenhuma, principal, home]
+      retomar_prodio:
+        description: 'Testar e reativar fontes existentes do Prodio'
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -33,6 +37,8 @@ jobs:
     env:
       DEPLOY_ENVIRONMENT: production
       KAMINO_RESUME_SLOT: ${{ inputs.retomar_kamino || 'nenhuma' }}
+      PRODIO_RESUME: ${{ inputs.retomar_prodio && 'true' || 'false' }}
+      PRODIO_API_TOKEN: ${{ secrets.PRODIO_API_TOKEN }}
       BANCO_URL: ${{ secrets.BANCO_URL }}
       BACKUP_SENHA: ${{ secrets.BACKUP_SENHA }}
       SUPABASE_URL: ${{ vars.SUPABASE_URL }}
@@ -107,3 +113,7 @@ jobs:
         run: |
           pnpm exec vite build --ssr apps/worker/src/kamino/bootstrap.ts --outDir .data/kamino-runner
           node .data/kamino-runner/bootstrap.js
+      - name: Inicializar fontes novas do Prodio quando o token estiver disponível
+        run: |
+          pnpm exec vite build --ssr apps/worker/src/prodio/bootstrap.ts --outDir .data/prodio-runner
+          node .data/prodio-runner/bootstrap.js

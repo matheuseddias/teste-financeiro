@@ -14,6 +14,8 @@ do $$
 declare tenant uuid := 'edd1a500-0000-4000-8000-000000000001'; payload jsonb; rev text; one uuid; again uuid;
 begin
  select jsonb_build_object(
+ 'fin_prodio_sources',coalesce((select jsonb_agg(to_jsonb(t)) from public.fin_prodio_sources t where tenant_id=tenant),'[]'::jsonb),
+ 'fin_prodio_documents',coalesce((select jsonb_agg(to_jsonb(t)) from public.fin_prodio_documents t where tenant_id=tenant),'[]'::jsonb),
  'fin_kamino_sources',coalesce((select jsonb_agg(to_jsonb(t)) from public.fin_kamino_sources t where tenant_id=tenant),'[]'::jsonb),
  'fin_kamino_documents',coalesce((select jsonb_agg(to_jsonb(t)) from public.fin_kamino_documents t where tenant_id=tenant),'[]'::jsonb),
  'fin_rules',(select coalesce(jsonb_agg(to_jsonb(x)),'[]') from public.fin_rules x where tenant_id=tenant),

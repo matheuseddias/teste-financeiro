@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment, type BankTransaction, type Allocation, type ImportProfile, type ClassificationRule, type KaminoSource, type KaminoDocument } from '@eddias/core';
+import { access, type Membership, type Company, type BankAccount, type Snapshot, type AuditEvent, type Plan, type Commitment, type BankTransaction, type Allocation, type ImportProfile, type ClassificationRule, type KaminoSource, type KaminoDocument, type ProdioSource, type ProdioDocument } from '@eddias/core';
 export class Repo {
   constructor(readonly client: SupabaseClient, readonly member: Membership) {}
   async rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
@@ -19,7 +19,7 @@ export class Repo {
     }
   }
   async load(): Promise<Snapshot> {
-    const [companies, accounts, memberships, plans, commitments, transactions, allocations, profiles, rules, kaminoSources, kaminoDocuments] = await Promise.all([
+    const [companies, accounts, memberships, plans, commitments, transactions, allocations, profiles, rules, kaminoSources, kaminoDocuments, prodioSources, prodioDocuments] = await Promise.all([
       access(this.member, 'empresas') !== 'none' || access(this.member, 'contas') !== 'none' || access(this.member, 'planejamento') !== 'none' || access(this.member, 'extratos') !== 'none'
         ? this.all<Company>('fin_companies') : [],
       access(this.member, 'contas') !== 'none' || access(this.member, 'extratos') !== 'none' ? this.all<BankAccount>('fin_bank_accounts') : [],
@@ -32,8 +32,10 @@ export class Repo {
       access(this.member, 'extratos') !== 'none' ? this.all<ClassificationRule>('fin_rules') : [],
       this.member.role === 'admin' ? this.all<KaminoSource>('fin_kamino_sources') : [],
       this.member.role === 'admin' ? this.all<KaminoDocument>('fin_kamino_documents') : [],
+      this.member.role === 'admin' ? this.all<ProdioSource>('fin_prodio_sources') : [],
+      this.member.role === 'admin' ? this.all<ProdioDocument>('fin_prodio_documents') : [],
     ]);
-    return { companies, accounts, memberships, plans, commitments, transactions, allocations, profiles, rules, kaminoSources, kaminoDocuments };
+    return { companies, accounts, memberships, plans, commitments, transactions, allocations, profiles, rules, kaminoSources, kaminoDocuments, prodioSources, prodioDocuments };
   }
   saveCompany(value: { id: string; name: string; document: string; version: number }) {
     return this.rpc<Company>('fin_save_company', { p_id: value.id, p_name: value.name,

@@ -8,6 +8,7 @@ import { Empty, Notice, useDraft } from '../../ui';
 import { Premises } from './Premises';
 import { Actuals } from './Actuals';
 import { Results } from './Results';
+import { Historical } from './Historical';
 import { monthLabel } from './fields';
 export function Planning() {
   const { data } = useStore(); const { member } = useAuth();
@@ -16,7 +17,8 @@ export function Planning() {
   const canEdit = access(member, 'planejamento') === 'edit';
   function select(id: string) { if (!document.querySelector('form[data-dirty="true"]') || window.confirm('Trocar de cenário? O rascunho ficará salvo neste dispositivo.')) setSelected(id); }
   return <><div className="page-heading"><div><p className="eyebrow">PLANEJE OS PRÓXIMOS MESES</p><h1>Projeções de caixa</h1><p>Do GMV ao dinheiro que chega à conta.</p></div>{canEdit && <button onClick={() => select('new')}><Plus size={18} />Novo cenário</button>}</div>
-    <Notice>Consolidado do grupo · GMV e conversão em caixa informados manualmente. Extratos classificados e conciliados podem atualizar o caixa.</Notice>
+    <Notice>Consolidado do grupo · Premissas editáveis de GMV e conversão. Extratos classificados e conciliados atualizam o caixa; o histórico do Prodio pode orientar novas premissas após conferência.</Notice>
+    {member.role==='admin'&&<Historical saved={setSelected}/>}
     {!!plans.length && <div className="scenario-bar"><label>Cenário<select aria-label="Cenário" value={selected === 'new' ? 'new' : active?.id || ''} onChange={e => select(e.target.value)}>{selected === 'new' && <option value="new">Novo cenário</option>}{plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label><span className="badge"><TrendingUp size={14} />{plans.length} cenário(s) salvo(s)</span></div>}
     {!active && selected !== 'new' ? <Empty title="Seu primeiro cenário de caixa">Crie um cenário, informe o GMV dos canais e o percentual que efetivamente chega ao banco. Depois acrescente custos e fornecedores.</Empty> : <Workspace key={active ? active.id + ':' + active.version : 'new'} plan={active || null} canEdit={canEdit} saved={setSelected} />}
   </>;

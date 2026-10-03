@@ -23,7 +23,7 @@ try{
   else if(path.endsWith('/fin_kamino_sources'))data=sources;
   else if(path.endsWith('/fin_kamino_documents'))data=documents;
   else if(path.endsWith('/fin_kamino_review')){data={total:1,linked:0,possible_duplicates:0};if(!b.p_dry_run){writes++;entries.push({id:crypto.randomUUID(),tenant_id:tenant,company_id:b.p_company_id,name:base.description,due_date:base.due_date,amount_cents:base.amount_cents,direction:'saida',category:b.p_category,version:1,deleted_at:null});base.commitment_id=entries[0].id;base.reviewed_fingerprint=base.fingerprint;base.version++;}}
-  else if(['/fin_members','/fin_bank_accounts','/fin_plans','/fin_transactions','/fin_allocations','/fin_import_profiles','/fin_rules'].some(t=>path.endsWith(t)))data=[];
+  else if(['/fin_prodio_sources','/fin_prodio_documents','/fin_members','/fin_bank_accounts','/fin_plans','/fin_transactions','/fin_allocations','/fin_import_profiles','/fin_rules'].some(t=>path.endsWith(t)))data=[];
   else throw new Error('Requisição inesperada: '+path);
   await route.fulfill({json:data});
  });

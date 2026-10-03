@@ -26,6 +26,7 @@ export interface Snapshot {
   transactions: import('./statements').BankTransaction[]; allocations: import('./statements').Allocation[]; profiles: import('./statements').ImportProfile[];
   rules: import('./learning').ClassificationRule[];
   kaminoSources: import('./kamino').KaminoSource[]; kaminoDocuments: import('./kamino').KaminoDocument[];
+  prodioSources: import('./prodio').ProdioSource[]; prodioDocuments: import('./prodio').ProdioDocument[];
 }
 export const MAX_CENTS = 9_000_000_000_000;
 export function access(member: Membership | null, area: Area): Access {
@@ -74,3 +75,4 @@ export * from './planning';
 export * from './statements';
 export * from './learning';
 export * from './kamino';
+export * from './prodio';
