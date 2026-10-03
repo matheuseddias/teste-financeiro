@@ -14,7 +14,7 @@ async function main(){
   if(!['principal','home'].includes(source.slot)||!['pagamentos','notas'].includes(source.kind))throw new Error('Fonte não reconhecida.');
   const count=await read('fin_kamino_documents?tenant_id=eq.'+tenant+'&slot=eq.'+source.slot+'&kind=eq.'+source.kind+'&select=id','HEAD');
   const total=Number(count.headers.get('Content-Range')?.split('/')[1]);if(!Number.isSafeInteger(total)||total<0)throw new Error('Contagem não reconhecida.');
-  console.log(JSON.stringify({slot:source.slot,kind:source.kind,enabled:source.enabled,validated:!!source.validated_at,last_success_at:source.last_success_at,last_full_sync_at:source.last_full_sync_at,has_error:!!source.last_error,documents:total,cursor:source.cursor}));
+  console.log(JSON.stringify({slot:source.slot,kind:source.kind,enabled:source.enabled,validated:!!source.validated_at,last_success_at:source.last_success_at,last_full_sync_at:source.last_full_sync_at,has_error:!!source.last_error,error:source.last_error,documents:total,cursor:source.cursor}));
  }
  if(!sources.length)console.log('Nenhuma fonte inicializada.');
 }
