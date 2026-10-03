@@ -1,6 +1,6 @@
 {
   "name": "eddias-financeiro",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -9,7 +9,7 @@
     "build": "tsc --noEmit && vite build --config apps/web/vite.config.ts",
     "lint": "oxlint apps packages scripts tests",
     "test": "vitest run && node --test supabase/migracoes/trava.test.mjs",
-    "test:browser": "node tests/browser.mjs && node tests/statements-browser.mjs",
+    "test:browser": "node tests/browser.mjs && node tests/statements-browser.mjs && node tests/kamino-browser.mjs",
     "db:test": "bash supabase/tests/run.sh",
     "db:aplicar": "bash supabase/aplicar-migracoes.sh",
     "check": "pnpm lint && pnpm test && pnpm build && pnpm db:test && pnpm test:worker-runtime",

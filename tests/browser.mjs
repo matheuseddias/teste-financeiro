@@ -21,7 +21,7 @@ try {
     else if (path.endsWith('/fin_plans')) data = plans;
     else if (path.endsWith('/fin_commitments')) data = commitments;
     else if (path.endsWith('/fin_save_plan')) { const previous = plans.findIndex(p => p.id === b.p_id); data = { id: b.p_id, name: b.p_name, config: b.p_config, version: b.p_version + 1, tenant_id: tenant, deleted_at: null }; if (previous >= 0) plans[previous] = data; else plans.push(data); }
-    else if (['/fin_rules', '/fin_transactions','/fin_allocations','/fin_import_profiles'].some(t => path.endsWith(t))) data = [];
+    else if (['/fin_kamino_sources','/fin_kamino_documents','/fin_rules', '/fin_transactions','/fin_allocations','/fin_import_profiles'].some(t => path.endsWith(t))) data = [];
     else if (path.endsWith('/fin_members')) data = [];
     else if (path.endsWith('/fin_companies')) data = companies;
     else if (path.endsWith('/fin_bank_accounts')) data = accounts;

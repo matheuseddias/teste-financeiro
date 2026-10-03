@@ -24,6 +24,7 @@ try {
   else if(path.endsWith('/fin_companies'))data=[{id:company,tenant_id:tenant,name:'Empresa teste',document:null,version:1,deleted_at:null}];
   else if(path.endsWith('/fin_bank_accounts'))data=[{id:account,tenant_id:tenant,company_id:company,name:'Conta teste',bank_name:'Banco teste',bank_code:'001',branch:'',account_number:'0001',kind:'corrente',currency:'BRL',reference_date:null,reference_balance_cents:null,version:1,deleted_at:null}];
   else if(path.endsWith('/fin_commitments'))data=[commitment];
+  else if(path.endsWith('/fin_kamino_sources')||path.endsWith('/fin_kamino_documents'))data=[];
   else if(path.endsWith('/fin_rules'))data=rules;
   else if(path.endsWith('/fin_transactions'))data=transactions;
   else if(path.endsWith('/fin_allocations'))data=allocations;

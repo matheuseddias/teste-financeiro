@@ -9,8 +9,9 @@ import { Companies } from '../pages/Companies';
 import { Audit, Settings } from '../pages/Settings';
 import { Planning } from '../pages/planning/Planning';
 import { Statements } from '../pages/statements/Statements';
+import { Kamino } from '../pages/kamino/Kamino';
 import { Commitments } from '../pages/Commitments';
-type Page = 'extratos' | 'projecoes' | 'lancamentos' | 'inicio' | 'empresas' | 'contas' | 'auditoria' | 'config';
+type Page = 'kamino' | 'extratos' | 'projecoes' | 'lancamentos' | 'inicio' | 'empresas' | 'contas' | 'auditoria' | 'config';
 export function App() {
   const { member, session, signOut, config } = useAuth(); const { data, error, refresh } = useStore();
   const [page, setPage] = useState<Page>('inicio'); const [menu, setMenu] = useState(false);
@@ -23,6 +24,7 @@ export function App() {
     { id: 'empresas' as const, label: 'Empresas', icon: Building2, visible: access(member, 'empresas') !== 'none' },
     { id: 'contas' as const, label: 'Contas bancárias', icon: Landmark, visible: access(member, 'contas') !== 'none' },
     { id: 'auditoria' as const, label: 'Histórico', icon: ShieldCheck, visible: access(member, 'auditoria') !== 'none' },
+    { id: 'kamino' as const, label: 'Kamino', icon: Landmark, visible: member.role === 'admin' },
     { id: 'config' as const, label: 'Configurações', icon: Users, visible: member.role === 'admin' },
   ].filter(t => t.visible);
   const current = tabs.some(t => t.id === page) ? page : 'inicio';
@@ -49,7 +51,7 @@ export function App() {
             <ol><li><span>01</span><div><strong>Identifique as empresas</strong><p>Separe Eddias e Eddias Home conforme a operação.</p></div></li><li><span>02</span><div><strong>Cadastre as contas</strong><p>Inclua bancos e contas digitais, como a Kamino.</p></div></li><li><span>03</span><div><strong>Informe uma referência</strong><p>Registre saldo e data, sem misturar períodos.</p></div></li></ol></section>
           <Notice>Os saldos cadastrados são referências informadas. Não representam valores bancários conciliados.</Notice>
         </>}
-        {current === 'extratos' && <Statements />}{current === 'projecoes' && <Planning />}{current === 'lancamentos' && <Commitments />}
+        {current === 'kamino' && member.role === 'admin' && <Kamino />}{current === 'extratos' && <Statements />}{current === 'projecoes' && <Planning />}{current === 'lancamentos' && <Commitments />}
         {current === 'empresas' && <Companies />}{current === 'contas' && <Accounts />}{current === 'auditoria' && <Audit />}{current === 'config' && member.role === 'admin' && <Settings />}
       </>}<footer>Grupo Eddias <span>Financeiro · {new Date().getFullYear()}</span></footer></main>
     </div></div>;

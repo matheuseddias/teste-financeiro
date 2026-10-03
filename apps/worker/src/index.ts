@@ -1,10 +1,13 @@
 import { config, HttpError, json, uuid, type Env } from './config';
 import { backup, Database } from './backup';
+import { kaminoRoute } from './kamino/routes';
+import { kaminoCron } from './kamino/sync';
 export async function handle(request: Request, env: Env, db = new Database(env)) {
   try {
     const path = new URL(request.url).pathname;
+    if (path.startsWith('/api/kamino/')) return await kaminoRoute(request, env, db);
     if (request.method === 'GET' && path === '/api/config') return json(config(env));
-    if (request.method === 'GET' && path === '/api/health') { config(env); return json({ ok: true, version: '0.5.0', environment: env.ENVIRONMENT }); }
+    if (request.method === 'GET' && path === '/api/health') { config(env); return json({ ok: true, version: '0.6.0', environment: env.ENVIRONMENT }); }
     if (path !== '/api/backup') return json({ error: 'Recurso não encontrado.' }, 404);
     if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
     const token = request.headers.get('Authorization');
@@ -27,9 +30,10 @@ export default {
   async fetch(request: Request, env: Env) {
     try { return await handle(request, env); } catch { return json({ error: 'Configuração do serviço indisponível.' }, 503); }
   },
-  async scheduled(event: { scheduledTime: number }, env: Env) {
+  async scheduled(event: { scheduledTime: number; cron?: string }, env: Env) {
     if (env.ENVIRONMENT !== 'production') return;
     const db = new Database(env);
+    if (event.cron === '*/2 * * * *') { await kaminoCron(env, db); return; }
     const tenants = await db.rows('fin_tenants');
     for (const tenant of tenants) {
       if (!uuid(tenant.id)) throw new Error('Grupo inválido.');

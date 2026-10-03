@@ -33,6 +33,18 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      KAMINO_API_BASE: ${{ secrets.KAMINO_API_BASE }}
+      KAMINO_APP: ${{ secrets.KAMINO_APP }}
+      KAMINO_CN: ${{ secrets.KAMINO_CN }}
+      KAMINO_IDUSR: ${{ secrets.KAMINO_IDUSR }}
+      KAMINO_USR: ${{ secrets.KAMINO_USR }}
+      KAMINO_HASH: ${{ secrets.KAMINO_HASH }}
+      KAMINO_HOME_API_BASE: ${{ secrets.KAMINO_HOME_API_BASE }}
+      KAMINO_HOME_APP: ${{ secrets.KAMINO_HOME_APP }}
+      KAMINO_HOME_CN: ${{ secrets.KAMINO_HOME_CN }}
+      KAMINO_HOME_IDUSR: ${{ secrets.KAMINO_HOME_IDUSR }}
+      KAMINO_HOME_USR: ${{ secrets.KAMINO_HOME_USR }}
+      KAMINO_HOME_HASH: ${{ secrets.KAMINO_HOME_HASH }}
       PGSSLMODE: verify-full
       PGCONNECT_TIMEOUT: 15
       ENSAIO_URL: postgresql://postgres:ensaio-local@127.0.0.1:5432/ensaio?sslmode=disable
@@ -84,3 +96,7 @@ jobs:
         run: bash supabase/migracoes/ensaio.sh && bash supabase/aplicar-migracoes.sh
       - name: Publicar Worker e Pages
         run: bash scripts/deploy.sh
+      - name: Inicializar fontes novas da Kamino
+        run: |
+          pnpm exec vite build --ssr apps/worker/src/kamino/bootstrap.ts --outDir .data/kamino-runner
+          node .data/kamino-runner/bootstrap.js

@@ -25,6 +25,7 @@ export interface Snapshot {
   plans: import('./planning').Plan[]; commitments: import('./planning').Commitment[];
   transactions: import('./statements').BankTransaction[]; allocations: import('./statements').Allocation[]; profiles: import('./statements').ImportProfile[];
   rules: import('./learning').ClassificationRule[];
+  kaminoSources: import('./kamino').KaminoSource[]; kaminoDocuments: import('./kamino').KaminoDocument[];
 }
 export const MAX_CENTS = 9_000_000_000_000;
 export function access(member: Membership | null, area: Area): Access {
@@ -72,3 +73,4 @@ export * from './planning';
 
 export * from './statements';
 export * from './learning';
+export * from './kamino';
