@@ -35,13 +35,27 @@ As três execuções concluíram testes, backup cifrado externo, ensaio, migraç
 
 Validação local da 0.5: 29 testes Vitest, 17 da trava SQL, PostgreSQL real, backup/restauração/reaplicação, workerd e navegador com API simulada, inclusive bundle de produção. O XLSX real Kamino foi somente lido em memória; nenhuma movimentação dele foi gravada em produção.
 
-O usuário confirmou as seis credenciais Kamino em `financeiro-producao`; a execução de diagnóstico `37090289661` comprovou acesso real às duas APIs. A consulta de notas do dia estava vazia. O foco autorizado nesta retomada é Kamino; Prodio permanece pendente, sem alterações nesta etapa. Conversão histórica automática e conciliação automática com obrigações permanecem pendentes; as premissas de projeção seguem manuais.
+O usuário confirmou as seis credenciais Kamino em `financeiro-producao`; a execução de diagnóstico `37090289661` comprovou acesso real às duas APIs. A consulta de notas do dia estava vazia. Após a etapa Kamino, o usuário pediu continuidade e confirmou **Eddias** como nome no Prodio. Integração Prodio ainda em preparação, sem alterações publicadas nesta etapa. Conversão histórica automática e conciliação automática com obrigações permanecem pendentes; as premissas de projeção seguem manuais.
+
+## Kamino 0.6 publicada em 03/10/2026
+
+Implementação `f3c2595`, correções `19ceff8`/`f79b491`, [Actions 37092984999](https://github.com/matheuseddias/teste-financeiro/actions/runs/37092984999) concluído com sucesso: testes, backup cifrado, ensaio, publicação e inicialização real. Migração 7 `20261003000100_kamino.sql` aplicada e imutável. A tentativa anterior publicou a aplicação, mas interrompeu a inicialização; o tratamento de HTTP 204 do Supabase foi corrigido e testado antes da retomada.
+
+Às 00h15 de Brasília, o diagnóstico [37092564170](https://github.com/matheuseddias/teste-financeiro/actions/runs/37092564170) confirmou 100 títulos e 11 notas reais persistidos, fontes principal/pagamentos e principal/notas habilitadas/validadas, sem erro. Pagamentos seguiram para página 2 e notas para 02/09. Primeiro ciclo completo ainda pendente; não afirmar que todo o histórico foi carregado.
+
+HTTPS: site/assets 200, health 0.6.0/production, Kamino sem sessão 401, fontes/documentos anônimos 401. Seis bindings Kamino e crons diário de backup + leitura a cada dois minutos confirmados por nomes/tipos. Login real do administrador ainda não exercitado.
+
+Validação: 36 Vitest + 17 de trava SQL; PostgreSQL/RLS/revisão/duplicatas/conciliações preservadas/backup/restauração; workerd; três suítes de navegador com API simulada. O mapeamento de NF-e foi confirmado por notas reais na carga inicial, além dos testes sintéticos. Consulte [kamino.md](kamino.md).
+
+A revisão de títulos abertos por empresa/categoria inclui ou atualiza as previsões; NF-e não gera uma segunda saída e status pago não inventa realizado bancário. Leitura automática não altera sozinha as previsões já revisadas. Prodio, conversão histórica GMV/caixa e vínculos financeiros automáticos continuam pendentes. O usuário confirmou depois o nome Eddias no Prodio e pediu continuidade durante a noite.
+
+O diagnóstico [37093564529](https://github.com/matheuseddias/teste-financeiro/actions/runs/37093564529), às 00h33 de Brasília, confirmou **execuções automáticas reais após o deploy**, com avanço para 300 títulos/página 4 e 15 notas/04 de setembro; ambas as fontes ativas e sem erro. A chamada de fetch com contexto incorreto no Workers foi reproduzida no workerd, corrigida e coberta por regressão. Primeiro ciclo completo continua em processamento.
 
 ## Evidências atualizadas do Prodio
 
 Entrega 0.3: projeções e lançamentos previstos publicados no commit `0e6c5ab`, execução `37072852604` aprovada. Entrega 0.4: importação XLSX/CSV/OFX, perfis, prévia/deduplicação, conciliação parcial/múltipla e atualização do fluxo por realizado. Consulte [extratos.md](extratos.md) e [projecoes.md](projecoes.md) para limitações; a publicação de cada revisão deve ser confirmada no Actions e em `/api/health`. A parte Prodio da F4 segue pendente. A versão 0.5 entrega a primeira automação da F6: sugestões consistentes, aprovação e regras de classificação. Vínculos financeiros automáticos e validação integrada com fontes externas permanecem pendentes. Não interpretar as premissas manuais de conversão como aprendizado histórico.
 
-Referência remota consultada em 01/10/2026: commit `eb9f245`. A cópia local anterior (`a8148ac`) não representava mais o código atual.
+Referência atualizada em 03/10/2026 por fast-forward preservando checkout limpo: commit `e7c5a47`. O usuário confirmou o nome **Eddias**; resolver sua identidade real com escopo restrito antes de consumir dados. Não inferir o ID de produção pelo seed.
 
 - `apps/worker/src/conectores/baselinkerEntrega.ts` lê `order_source`, `order_source_id` e `order_source_info`, normalizando `origem` e `origemNome`.
 - `apps/worker/src/jobs/syncPedidos.ts` envia esses campos para persistência.
