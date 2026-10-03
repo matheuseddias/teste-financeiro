@@ -1,0 +1,27 @@
+name: Validar leitura Kamino
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: financeiro-kamino-diagnostico
+  cancel-in-progress: false
+jobs:
+  validar:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: financeiro-producao
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Consultar uma página mínima e uma janela de notas
+        env:
+          KAMINO_API_BASE: ${{ secrets.KAMINO_API_BASE }}
+          KAMINO_APP: ${{ secrets.KAMINO_APP }}
+          KAMINO_CN: ${{ secrets.KAMINO_CN }}
+          KAMINO_IDUSR: ${{ secrets.KAMINO_IDUSR }}
+          KAMINO_USR: ${{ secrets.KAMINO_USR }}
+          KAMINO_HASH: ${{ secrets.KAMINO_HASH }}
+        run: node scripts/kamino-probe.mjs
