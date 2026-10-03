@@ -46,3 +46,5 @@ Essa taxa é uma **estimativa por janela**, não uma conciliação individual de
 ## Validação
 
 Os testes usam dados sintéticos para autenticação, empresa/escopos, centavos/fuso, paginação opaca, limites, atualização, RLS, backoff e cenários. O teste no workerd exercita a sincronização com respostas externas simuladas, incluindo RPC HTTP 204. O navegador confere token ausente, cobertura incompleta, taxa, confirmação, cenário e mobile. Não substituem a primeira consulta real ao Prodio nem login real do administrador.
+
+Publicação 0.7 confirmada no commit `41c0638`, [Actions 37095659839](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095659839). Backup cifrado e ensaio precederam a migração 8. HTTPS remoto confirmou versão/arquivos e bloqueio anônimo; token ausente e bootstrap sem consulta real.

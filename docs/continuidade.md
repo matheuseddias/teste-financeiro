@@ -51,7 +51,7 @@ A revisão de títulos abertos por empresa/categoria inclui ou atualiza as previ
 
 O diagnóstico [37093564529](https://github.com/matheuseddias/teste-financeiro/actions/runs/37093564529), às 00h33 de Brasília, confirmou **execuções automáticas reais após o deploy**, com avanço para 300 títulos/página 4 e 15 notas/04 de setembro; ambas as fontes ativas e sem erro. A chamada de fetch com contexto incorreto no Workers foi reproduzida no workerd, corrigida e coberta por regressão. Primeiro ciclo completo continua em processamento.
 
-## Prodio e histórico 0.7 — implementação e validação local
+## Prodio e histórico 0.7 — publicados em 03/10/2026
 
 O usuário forneceu o contrato público v1 antecipado e informou que entregará o token amanhã. A ideia anterior de ponte privada foi abandonada antes de alterar código Prodio. Referência Prodio segue limpa em `e7c5a47`; somente o Financeiro foi implementado.
 
@@ -61,7 +61,7 @@ Projeções agora incluem histórico GMV × repasses por janela deslocada pelo p
 
 Validação local: 48 testes Vitest + 17 de trava SQL; PostgreSQL real com RLS, versão, lease, idempotência, empresa fixada, atualização fora de ordem, backoff e lista vazia; backup/restauração/ensaio/reaplicação; workerd real com respostas externas simuladas. Quatro suítes de navegador passaram com API simulada, incluindo ausência de token, histórico parcial bloqueado, taxa de 80%, confirmação e criação de cenário. Os mocks das telas existentes foram atualizados para as duas novas tabelas. Nenhum dado de teste foi enviado à produção.
 
-Ativação amanhã: secret `PRODIO_API_TOKEN` em GitHub `financeiro-producao`, token da empresa Eddias com pedidos:ler, compras:ler, notas:ler e custos:ler; executar Publicar Financeiro. A API deve disponibilizar as rotas E2. Detalhes em [prodio.md](prodio.md). Publicação 0.7 ainda precisa de confirmação no Actions antes de ser considerada entregue; migração 8 permanece não aplicada neste registro.
+Ativação amanhã: secret `PRODIO_API_TOKEN` em GitHub `financeiro-producao`, token da empresa Eddias com pedidos:ler, compras:ler, notas:ler e custos:ler; executar Publicar Financeiro. A API deve disponibilizar as rotas E2. Detalhes em [prodio.md](prodio.md). Publicação confirmada: commit `41c0638`, [Actions 37095659839](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095659839) concluído com sucesso. Backup cifrado guardado, ensaio e migração 8 aplicados; migrações 1–8 agora imutáveis. HTTPS remoto: health 0.7.0/production, site e assets 200, rotas sem sessão e tabelas Prodio anônimas 401. Três crons confirmados; token Prodio ausente no Worker e inicialização corretamente encerrada sem consulta externa. Seis bindings Kamino preservados. Login real e leitura Prodio real continuam pendentes.
 
 ## Evidências atualizadas do Prodio
 
@@ -96,3 +96,7 @@ Limite documentado de 20 requisições/minuto por cliente (CN), compartilhado co
 - Credenciais Kamino e acesso às duas listas foram validados. Cobertura histórica depende da conclusão dos ciclos de sincronização. Acesso de leitura real ao Prodio permanece pendente.
 - Não foi recebido OFX real; testes com exemplos sintéticos não substituem validação do arquivo do banco utilizado.
 - Migrações já publicadas são imutáveis. Cada fase acrescenta migrações, executa testes, backup cifrado e ensaio antes da publicação.
+
+Último diagnóstico Kamino antes desta publicação: [37095569974](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095569974), 01h09 de Brasília, fontes ativas/validadas sem erro, 1.200 títulos/página 13 e 30 notas/janela de 13 de setembro. Cobertura inicial ainda em andamento.
+
+Diagnóstico após deploy: [37095800821](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095800821), 01h13 de Brasília, Kamino preservada ativa/validada e sem erro, com 1.300 títulos/página 14 e 32 notas/janela de 14 de setembro. A leitura de notas ocorreu depois da publicação. Primeiros ciclos ainda incompletos.
