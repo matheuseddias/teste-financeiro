@@ -33,6 +33,12 @@ describe('Prodio contrato v1',()=>{
   expect(()=>record('pedidos',{...raw,significado:'desconhecido'},'UTC')).toThrow('significado');
   expect(()=>instant('2026-02-31T12:00:00Z','data')).toThrow();
  });
+ it('aceita UUIDs legados do PostgreSQL e mantém recusa de identificadores malformados',()=>{
+  const legacy='AAAAAAAA-0000-0000-0000-000000000001';
+  expect(profile({...me,empresa:{...me.empresa,id:legacy}}).companyId).toBe(legacy.toLowerCase());
+  expect(record('pedidos',{...raw,id:legacy},'UTC').source_id).toBe(legacy.toLowerCase());
+  for(const value of ['não-é-uuid',legacy+'extra',123,null])expect(()=>profile({...me,empresa:{...me.empresa,id:value}})).toThrow('empresa.id');
+ });
  it('recusa paginação sem avanço e mantém notas/ordens como referências sem criar vencimentos',async()=>{
   await expect(page('pedidos',{dados:[raw,raw],proximo_cursor:null},'UTC',null)).rejects.toThrow('repetido');
   await expect(page('pedidos',{dados:[],proximo_cursor:'x'},'UTC',null)).rejects.toThrow('sem avanço');

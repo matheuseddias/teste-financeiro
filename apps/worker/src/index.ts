@@ -10,7 +10,7 @@ export async function handle(request: Request, env: Env, db = new Database(env))
     if (path.startsWith('/api/kamino/')) return await kaminoRoute(request, env, db);
     if (path.startsWith('/api/prodio/')) return await prodioRoute(request, env, db);
     if (request.method === 'GET' && path === '/api/config') return json(config(env));
-    if (request.method === 'GET' && path === '/api/health') { config(env); return json({ ok: true, version: '0.7.0', environment: env.ENVIRONMENT }); }
+    if (request.method === 'GET' && path === '/api/health') { config(env); return json({ ok: true, version: '0.7.1', environment: env.ENVIRONMENT }); }
     if (path !== '/api/backup') return json({ error: 'Recurso não encontrado.' }, 404);
     if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
     const token = request.headers.get('Authorization');

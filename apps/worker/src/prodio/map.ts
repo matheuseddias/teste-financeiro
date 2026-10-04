@@ -1,10 +1,10 @@
 import type { ProdioKind, ProdioRecord } from '../../../../packages/core/src/prodio';
 import { cents, obj } from '../kamino/map';
-import { uuid } from '../config';
 export const invalid=(field:string)=>new Error('Prodio: formato não reconhecido em '+field+'. Nenhum lote foi confirmado.');
 function str(v:unknown,field:string,max=120):string {if(typeof v!=='string'||!v.trim()||v.length>max)throw invalid(field);return v.trim();}
 function optional(v:unknown,field:string,max=120){return v==null?null:str(v,field,max);}
-function id(v:unknown,field:string){if(!uuid(v))throw invalid(field);return v;}
+// O contrato aceita UUID PostgreSQL, inclusive identificadores legados sem versão/variante RFC.
+function id(v:unknown,field:string){if(typeof v!=='string'||! /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v))throw invalid(field);return v.toLowerCase();}
 function ids(v:unknown,field:string){if(!Array.isArray(v)||v.length>200)throw invalid(field);return [...new Set(v.map(x=>id(x,field)))];}
 export function instant(v:unknown,field:string):string{
  if(typeof v!=='string'||!/^20\d{2}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,6})?(?:Z|[+-](?:0\d|1[0-4]):[0-5]\d)$/.test(v)||!Number.isFinite(Date.parse(v)))throw invalid(field);date(v.slice(0,10),field);return v;

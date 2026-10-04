@@ -1,0 +1,19 @@
+name: Validar acesso à API Prodio
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  conferir:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: financeiro-producao
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Conferir identidade, permissões e disponibilidade sem registrar documentos
+        env:
+          PRODIO_API_TOKEN: ${{ secrets.PRODIO_API_TOKEN }}
+        run: node scripts/prodio-validar.mjs
