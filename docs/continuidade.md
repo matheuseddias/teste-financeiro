@@ -100,3 +100,15 @@ Limite documentado de 20 requisições/minuto por cliente (CN), compartilhado co
 Último diagnóstico Kamino antes desta publicação: [37095569974](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095569974), 01h09 de Brasília, fontes ativas/validadas sem erro, 1.200 títulos/página 13 e 30 notas/janela de 13 de setembro. Cobertura inicial ainda em andamento.
 
 Diagnóstico após deploy: [37095800821](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095800821), 01h13 de Brasília, Kamino preservada ativa/validada e sem erro, com 1.300 títulos/página 14 e 32 notas/janela de 14 de setembro. A leitura de notas ocorreu depois da publicação. Primeiros ciclos ainda incompletos.
+
+## Ativação Prodio em 04/10/2026 — token confirmado, rotas E2 pendentes
+
+O usuário cadastrou o token. Diagnóstico [37175985818](https://github.com/matheuseddias/teste-financeiro/actions/runs/37175985818): `/eu` HTTP 200, empresa Eddias e quatro escopos corretos; `/pedidos`, `/compras/ordens` e `/notas` HTTP 404. Não pedir outro token. Leitura do código Prodio em `b1a82e3` confirmou roteador público E1 sem essas três rotas; checkout Prodio não foi alterado (somente fetch/consulta).
+
+Primeira tentativa [37175665145](https://github.com/matheuseddias/teste-financeiro/actions/runs/37175665145) publicou o segredo mas encontrou validação de UUID excessivamente estrita no Financeiro. Correção `2b6fd0a`, versão 0.7.1, aceita formato UUID PostgreSQL legado com teste de regressão; autenticação e conferência de empresa permanecem. Diagnósticos de API e estado/contagens adicionados sem expor token, documentos ou cursor opaco.
+
+[Publicação 37175987335](https://github.com/matheuseddias/teste-financeiro/actions/runs/37175987335): testes, backup, ensaio e deploy concluídos; inicialização Prodio falhou explicitamente por rota indisponível (E2), portanto o workflow terminou vermelho. Aplicação 0.7.1 e arquivos responderam 200 e rota Prodio sem sessão 401. Não confundir deploy realizado com sincronização bem-sucedida. Não houve nova migração; oito migrações continuam imutáveis. Validação: 49 Vitest + 17 trava SQL, build, PostgreSQL/workerd e quatro suítes de navegador via CI.
+
+Kamino [37175758811](https://github.com/matheuseddias/teste-financeiro/actions/runs/37175758811), 01h01 de Brasília: 7.341 títulos e 83 notas, ambas fontes ativas/validadas, sem erro, com ciclos completos registrados. Isso comprova a conclusão dos ciclos das consultas configuradas; a conferência financeira/empresa dos títulos e cobertura de extratos continuam necessárias.
+
+Próximo passo: a implementação separada da API Prodio precisa publicar as três rotas E2. Depois executar `prodio-validar.yml` e, passando, `publicar.yml` com `retomar_prodio=true`, `retomar_kamino=nenhuma`. Não modificar o backend Prodio nesta tarefa nem pedir que o usuário envie segredo pelo chat. Token já persistido no Worker e GitHub.

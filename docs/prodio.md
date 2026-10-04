@@ -48,3 +48,15 @@ Essa taxa é uma **estimativa por janela**, não uma conciliação individual de
 Os testes usam dados sintéticos para autenticação, empresa/escopos, centavos/fuso, paginação opaca, limites, atualização, RLS, backoff e cenários. O teste no workerd exercita a sincronização com respostas externas simuladas, incluindo RPC HTTP 204. O navegador confere token ausente, cobertura incompleta, taxa, confirmação, cenário e mobile. Não substituem a primeira consulta real ao Prodio nem login real do administrador.
 
 Publicação 0.7 confirmada no commit `41c0638`, [Actions 37095659839](https://github.com/matheuseddias/teste-financeiro/actions/runs/37095659839). Backup cifrado e ensaio precederam a migração 8. HTTPS remoto confirmou versão/arquivos e bloqueio anônimo; token ausente e bootstrap sem consulta real.
+
+## Ativação real em 04/10/2026
+
+O usuário cadastrou `PRODIO_API_TOKEN` no GitHub. Diagnóstico [37175985818](https://github.com/matheuseddias/teste-financeiro/actions/runs/37175985818) confirmou `/eu` HTTP 200, empresa Eddias, identificador UUID e todas as quatro permissões necessárias. **Não pedir novo token.**
+
+As rotas `/v1/pedidos`, `/v1/compras/ordens` e `/v1/notas` retornaram **404**. Conferência somente de leitura do código Prodio em `b1a82e3` mostrou que o roteador público ainda expõe as rotas E1, sem essas três rotas E2. O diagnóstico termina com falha deliberadamente para não sinalizar integração pronta. O token funciona; a sincronização financeira permanece bloqueada pela disponibilidade das rotas.
+
+A primeira tentativa também revelou uma restrição indevida do Financeiro: UUIDs PostgreSQL legados não precisam conter versão/variante RFC. A correção mantém a validação de formato, normaliza caixa e preserva a conferência da empresa/UUID. Não altera autenticação nem as regras de acesso.
+
+Depois que a API Prodio publicar essas três rotas, executar **Validar acesso à API Prodio** e, passando, **Publicar Financeiro** com `retomar_prodio=true` e `retomar_kamino=nenhuma`. O workflow **Conferir sincronização Prodio** mostra estado e contagens sem documentos e sem cursor opaco. Não alterar o backend Prodio a partir desta tarefa: a implementação da API está sendo conduzida separadamente.
+
+Correção 0.7.1 publicada em `2b6fd0a`: [37175987335](https://github.com/matheuseddias/teste-financeiro/actions/runs/37175987335). Deploy, testes e backup passaram; a etapa final de inicialização falhou por 404/E2 ausente. Site/health 0.7.1 e proteção de sessão conferidos remotamente. Não considerar o workflow inteiro aprovado nem o Prodio sincronizado.
